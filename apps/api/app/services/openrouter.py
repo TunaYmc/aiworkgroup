@@ -141,30 +141,39 @@ class OpenRouterService:
 
         if not has_real_key:
             # Deterministic, real execution for local test & standalone environments:
-            # Analyze user prompt and run actual tools if requested!
             last_user_msg = next((m["content"] for m in reversed(current_messages) if m.get("role") == "user"), "")
-            yield {"type": "thought", "step": 1, "content": f"Görev incelendi: '{last_user_msg[:60]}...'. İlgili araçlar ve bağlam kontrol ediliyor."}
-            await asyncio.sleep(0.1)
+            yield {"type": "thought", "step": 1, "content": f"Kullanıcı mesajı analiz ediliyor: '{last_user_msg[:60]}...'"}
+            await asyncio.sleep(0.15)
 
-            # Check if user asked for file list or search or code
+            tool_outputs = []
             lower_prompt = last_user_msg.lower()
-            if "dosya" in lower_prompt or "listele" in lower_prompt or "file" in lower_prompt:
+            if "dosya" in lower_prompt or "listele" in lower_prompt or "file" in lower_prompt or "ls" in lower_prompt:
                 yield {"type": "tool_call", "step": 2, "tool": "list_files", "input": {"subpath": "."}}
                 try:
                     res = await tool_registry.execute_tool("list_files", {"subpath": "."}, context)
                     yield {"type": "tool_result", "step": 3, "tool": "list_files", "status": "success", "result": res}
+                    tool_outputs.append(f"📁 Çalışma Alanı Dosyaları: {json.dumps(res, ensure_ascii=False)}")
                 except Exception as ex:
                     yield {"type": "tool_result", "step": 3, "tool": "list_files", "status": "error", "result": str(ex)}
 
-            elif "ara" in lower_prompt or "search" in lower_prompt:
+            elif "ara" in lower_prompt or "search" in lower_prompt or "bul" in lower_prompt:
                 yield {"type": "tool_call", "step": 2, "tool": "file_search", "input": {"pattern": "*"}}
                 try:
                     res = await tool_registry.execute_tool("file_search", {"pattern": "*"}, context)
                     yield {"type": "tool_result", "step": 3, "tool": "file_search", "status": "success", "result": res}
+                    tool_outputs.append(f"🔍 Arama Sonuçları: {json.dumps(res, ensure_ascii=False)}")
                 except Exception as ex:
                     yield {"type": "tool_result", "step": 3, "tool": "file_search", "status": "error", "result": str(ex)}
 
-            yield {"type": "assistant_text", "content": f"Görev tamamlandı. Çalışma alanı analiz edildi ve sonuçlar hazırlandı: {last_user_msg}"}
+            reply_parts = [
+                f"Merhaba! Talebinizi başarıyla aldım:\n> *\"{last_user_msg}\"*\n",
+                "Şu anda yerel test/demo modunda yanıt veriyorum. Çok kiracılı çalışma alanı ve araç denetim sistemi başarıyla devrede.",
+            ]
+            if tool_outputs:
+                reply_parts.append("\n" + "\n".join(tool_outputs))
+            reply_parts.append("\n💡 *Not: Gerçek zamanlı Claude 3.7 / GPT-4o yapay zeka çıkarımı için `.env` dosyanıza kendi `OPENROUTER_API_KEY` değerinizi ekleyebilirsiniz.*")
+
+            yield {"type": "assistant_text", "content": "\n".join(reply_parts)}
             yield {"type": "done", "status": "completed"}
             return
 
@@ -237,6 +246,7 @@ class OpenRouterService:
             except Exception as ex:
                 logger.exception(f"OpenRouter invocation error: {ex}")
                 yield {"type": "error", "message": f"LLM Gateway Error: {str(ex)}"}
+                yield {"type": "assistant_text", "content": f"⚠️ LLM Servisi ile iletişim kurulurken bir sorun oluştu:\n`{str(ex)}`\n\nLütfen `.env` dosyanızdaki `OPENROUTER_API_KEY` anahtarınızı ve bakiye durumunuzu kontrol edin."}
                 break
 
         yield {"type": "done", "status": "completed"}

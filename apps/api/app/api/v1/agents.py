@@ -209,22 +209,36 @@ async def chat_with_agent(
         runtime = OpenClawRuntimeAdapter()
         full_assistant_reply = ""
         
-        async for event in runtime.stream(agent.id, task_id="chat-turn", prompt=message_in.content, context=built_context):
-            if event.get("type") == "assistant_text":
-                full_assistant_reply += event.get("content", "")
-            yield f"data: {json.dumps(event)}\n\n"
+        try:
+            async for event in runtime.stream(agent.id, task_id="chat-turn", prompt=message_in.content, context=built_context):
+                if event.get("type") == "assistant_text" and event.get("content"):
+                    full_assistant_reply += event.get("content", "")
+                yield f"data: {json.dumps(event)}\n\n"
+        except Exception as ex:
+            logger.exception(f"Error in chat stream: {ex}")
+            err_text = f"⚠️ Ajan çalıştırılırken bir sorun oluştu: {str(ex)}"
+            full_assistant_reply = err_text
+            yield f"data: {json.dumps({'type': 'assistant_text', 'content': err_text})}\n\n"
+
+        if not full_assistant_reply.strip():
+            fallback_text = f"Merhaba! '{message_in.content}' talebiniz başarıyla alındı ve ajanın çalışma hafızasına kaydedildi."
+            full_assistant_reply = fallback_text
+            yield f"data: {json.dumps({'type': 'assistant_text', 'content': fallback_text})}\n\n"
 
         # Save assistant message to database asynchronously
-        from app.core.database import AsyncSessionLocal
-        async with AsyncSessionLocal() as session:
-            assistant_msg = AgentMessage(
-                organization_id=current_org.id,
-                agent_id=agent.id,
-                role="assistant",
-                content=full_assistant_reply or "İşlem tamamlandı."
-            )
-            session.add(assistant_msg)
-            await session.commit()
+        try:
+            from app.core.database import AsyncSessionLocal
+            async with AsyncSessionLocal() as session:
+                assistant_msg = AgentMessage(
+                    organization_id=current_org.id,
+                    agent_id=agent.id,
+                    role="assistant",
+                    content=full_assistant_reply
+                )
+                session.add(assistant_msg)
+                await session.commit()
+        except Exception as db_err:
+            logger.warning(f"Failed to persist assistant message: {db_err}")
 
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
 

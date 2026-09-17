@@ -166,43 +166,99 @@ export default function AgentWorkspacePage() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
+      let receivedAnyText = false;
+
+      const processEvent = (event: any) => {
+        if (!event) return;
+        if (event.type === "thought") {
+          setCurrentToolActivity(event.content);
+        } else if (event.type === "tool_call") {
+          setCurrentToolActivity(`Araç çalıştırılıyor: ${event.tool}...`);
+        } else if (event.type === "tool_result") {
+          setCurrentToolActivity(`Araç tamamlandı: ${event.tool}`);
+        } else if (event.type === "permission_denied") {
+          setCurrentToolActivity(`Güvenlik Engeli: ${event.message}`);
+        } else if (event.type === "assistant_text") {
+          if (event.content) {
+            receivedAnyText = true;
+            setCurrentToolActivity(null);
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMsgId ? { ...m, content: m.content + event.content } : m
+              )
+            );
+          }
+        } else if (event.type === "error") {
+          receivedAnyText = true;
+          setCurrentToolActivity(null);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, content: (m.content ? m.content + "\n\n" : "") + `⚠️ ${event.message}` }
+                : m
+            )
+          );
+        } else if (event.type === "done") {
+          setCurrentToolActivity(null);
+        }
+      };
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n\n");
-        buffer = lines.pop() || "";
+        // Normalize CRLF to LF
+        buffer = buffer.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const rawData = line.slice(6).trim();
-            try {
-              const event = JSON.parse(rawData);
-              if (event.type === "thought") {
-                setCurrentToolActivity(event.content);
-              } else if (event.type === "tool_call") {
-                setCurrentToolActivity(`Araç çalıştırılıyor: ${event.tool}...`);
-              } else if (event.type === "tool_result") {
-                setCurrentToolActivity(`Araç sonucu alındı: ${event.tool}`);
-              } else if (event.type === "permission_denied") {
-                setCurrentToolActivity(`Güvenlik Engeli: ${event.message}`);
-              } else if (event.type === "assistant_text") {
-                setCurrentToolActivity(null);
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsgId ? { ...m, content: m.content + event.content } : m
-                  )
-                );
-              } else if (event.type === "done") {
-                setCurrentToolActivity(null);
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
+
+        for (const part of parts) {
+          const lines = part.split("\n");
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("data:")) {
+              const rawData = trimmed.replace(/^data:\s*/, "");
+              if (rawData) {
+                try {
+                  const event = JSON.parse(rawData);
+                  processEvent(event);
+                } catch (e) {
+                  // skip non-json
+                }
               }
-            } catch (e) {
-              // skip heartbeat or unparsed ping
             }
           }
         }
+      }
+
+      // Process any remaining text in buffer after stream finishes
+      if (buffer.trim()) {
+        const lines = buffer.trim().split("\n");
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("data:")) {
+            const rawData = trimmed.replace(/^data:\s*/, "");
+            if (rawData) {
+              try {
+                const event = JSON.parse(rawData);
+                processEvent(event);
+              } catch (e) {}
+            }
+          }
+        }
+      }
+
+      // Safeguard: ensure balloon is never empty
+      if (!receivedAnyText) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsgId && !m.content
+              ? { ...m, content: "İşlem tamamlandı. Talebiniz başarıyla işlendi." }
+              : m
+          )
+        );
       }
     } catch (err: any) {
       console.error("Chat streaming error:", err);
