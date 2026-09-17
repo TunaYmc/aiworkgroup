@@ -35,7 +35,10 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
         import redis.asyncio as aioredis
         r = aioredis.from_url(settings.REDIS_URL, socket_timeout=1.5)
         await r.ping()
-        await r.aclose()
+        try:
+            await r.aclose()
+        except Exception:
+            await r.close()
         checks["redis"] = "connected"
     except Exception as e:
         checks["redis"] = f"unavailable: {str(e)}"

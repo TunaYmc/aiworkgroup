@@ -3,6 +3,7 @@ import uuid
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from app.core.config import settings
@@ -61,7 +62,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Request tracking and Prometheus metrics middleware
+# Request tracking and Prometheus metrics middleware (safely isolated from request failure)
 @app.middleware("http")
 async def request_tracking_middleware(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
@@ -70,22 +71,49 @@ async def request_tracking_middleware(request: Request, call_next):
 
     try:
         response = await call_next(request)
-        duration = time.time() - start_time
-        duration_ms = round(duration * 1000, 2)
-        response.headers["X-Request-ID"] = request_id
-        response.headers["X-Response-Time-Ms"] = str(duration_ms)
-
-        REQUEST_COUNT.labels(method=request.method, endpoint=endpoint, status=response.status_code).inc()
-        REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(duration)
-        return response
     except Exception as ex:
-        REQUEST_COUNT.labels(method=request.method, endpoint=endpoint, status=500).inc()
-        raise
+        logger.exception(f"Unhandled exception processing {request.method} {endpoint}: {ex}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal Server Error", "error": str(ex)}
+        )
+
+    duration = time.time() - start_time
+    duration_ms = round(duration * 1000, 2)
+    response.headers["X-Request-ID"] = request_id
+    response.headers["X-Response-Time-Ms"] = str(duration_ms)
+
+    # Safely update Prometheus metrics without blocking or resetting connections
+    try:
+        status_str = str(response.status_code)
+        REQUEST_COUNT.labels(method=request.method, endpoint=endpoint, status=status_str).inc()
+        REQUEST_LATENCY.labels(method=request.method, endpoint=endpoint).observe(duration)
+    except Exception as metric_err:
+        logger.debug(f"Metrics collection skipped: {metric_err}")
+
+    return response
 
 # Prometheus /metrics endpoint
 @app.get("/metrics", tags=["Observability"])
 async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# Root-level convenience health endpoints
+@app.get("/health", tags=["Health"])
+async def root_health():
+    return {
+        "status": "healthy",
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT
+    }
+
+@app.get("/ready", tags=["Health"])
+async def root_ready():
+    from app.api.v1.health import readiness_check
+    from app.core.database import AsyncSessionLocal
+    async with AsyncSessionLocal() as session:
+        return await readiness_check(db=session)
 
 # Include API v1 Router
 app.include_router(api_v1_router, prefix="/api/v1")
