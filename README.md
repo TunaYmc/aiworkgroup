@@ -59,29 +59,30 @@ Storage & Databases:
 
 ## ⚡ 2. Çalıştırma Komutları (Sıfırdan Adım Adım)
 
-### Adım 1: Ortam Dosyasını Hazırlayın
+### Adım 1: Projeyi GitHub'dan Çekin
+```bash
+git clone git@github.com:TunaYmc/aiworkgroup.git /opt/yapayzekacalisan
+cd /opt/yapayzekacalisan
+```
+*(veya HTTPS ile: `git clone https://github.com/TunaYmc/aiworkgroup.git /opt/yapayzekacalisan`)*
+
+### Adım 2: Ortam Dosyasını Hazırlayın
 Proje ana dizinindeyken `.env.example` dosyasını `.env` olarak kopyalayın:
 ```bash
-cd /home/tuna/yapayzekacalisan
 cp .env.example .env
 ```
 *(İsteğe bağlı)* `.env` içindeki `OPENROUTER_API_KEY` alanına gerçek OpenRouter anahtarınızı girebilirsiniz. Anahtar girilmezse sistem yerel deterministik test modunda çalışır.
 
-### Adım 2: Tüm Docker Servislerini Başlatın
+### Adım 3: Tüm Docker Servislerini Başlatın
 ```bash
 docker compose up -d
 ```
 Tüm 7 servis (`web`, `api`, `worker`, `postgres`, `redis`, `minio`, `openclaw`, `caddy`) arka planda ayağa kalkacaktır.
 
-### Adım 3: Veritabanı Migration'larını Uygulayın
-Veritabanı tablolarını ve `pgvector` uzantısını Alembic ile oluşturun:
+### Adım 4: Veritabanı Migration'larını ve Seed Verilerini Yükleyin
+Veritabanı tablolarını ve başlangıç verilerini oluşturun:
 ```bash
 docker compose exec api alembic upgrade head
-```
-
-### Adım 4: Başlangıç Verilerini (Seed) Yükleyin
-Sisteme örnek süper yönetici, demo şirket, 2 adet AI çalışan (Satış & Muhasebe) ve vektör indeksli rehber dökümanı eklemek için:
-```bash
 docker compose exec api python -m app.scripts.seed
 ```
 
@@ -89,6 +90,26 @@ docker compose exec api python -m app.scripts.seed
 ```bash
 curl http://localhost:8000/api/v1/ready
 ```
+
+---
+
+## 🔄 GitHub Üzerinden Tek Komutla Otomatik Güncelleme
+
+Projeye GitHub üzerinden yeni bir güncelleme gönderildiğinde sunucunuzda tek komutla tüm sistemi güncellemek için:
+
+```bash
+chmod +x scripts/update.sh
+./scripts/update.sh
+```
+
+Bu script sırasıyla:
+1. `git pull origin main` ile son kodları çeker.
+2. Değişen Docker imajlarını yeniden derler (`docker compose build`).
+3. Konteynerleri kesintisiz günceller (`docker compose up -d`).
+4. Yeni veritabanı migration'larını uygular (`alembic upgrade head`).
+5. Eski imajları temizler (`docker image prune -f`).
+*(Detaylı Proxmox cron kurulumu için [PROXMOX_SETUP.md](PROXMOX_SETUP.md) dosyasına bakabilirsiniz).*
+
 
 ---
 
