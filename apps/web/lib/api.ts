@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const getApiUrl = () => {
+  if (typeof window !== "undefined") {
+    if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("localhost")) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    return `http://${window.location.hostname}:8000/api/v1`;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+};
 
 export interface Agent {
   id: string;
@@ -105,7 +113,7 @@ class ApiClient {
   }
 
   async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
+    const res = await fetch(`${getApiUrl()}${path}`, {
       headers: this.getHeaders(),
     });
     if (!res.ok) throw new Error(`API Error: ${res.status} ${await res.text()}`);
@@ -113,7 +121,7 @@ class ApiClient {
   }
 
   async post<T>(path: string, body?: any): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
+    const res = await fetch(`${getApiUrl()}${path}`, {
       method: "POST",
       headers: this.getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
@@ -123,7 +131,7 @@ class ApiClient {
   }
 
   async patch<T>(path: string, body?: any): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
+    const res = await fetch(`${getApiUrl()}${path}`, {
       method: "PATCH",
       headers: this.getHeaders(),
       body: body ? JSON.stringify(body) : undefined,
@@ -133,7 +141,7 @@ class ApiClient {
   }
 
   async delete<T>(path: string): Promise<T> {
-    const res = await fetch(`${API_URL}${path}`, {
+    const res = await fetch(`${getApiUrl()}${path}`, {
       method: "DELETE",
       headers: this.getHeaders(),
     });
