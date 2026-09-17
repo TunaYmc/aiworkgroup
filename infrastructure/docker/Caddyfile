@@ -1,0 +1,36 @@
+:80 {
+    # API endpoints routed to FastAPI backend
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    # Health & metrics endpoints
+    handle /health {
+        reverse_proxy api:8000
+    }
+    handle /ready {
+        reverse_proxy api:8000
+    }
+    handle /metrics {
+        reverse_proxy api:8000
+    }
+    handle /docs* {
+        reverse_proxy api:8000
+    }
+    handle /openapi.json {
+        reverse_proxy api:8000
+    }
+
+    # All frontend routes served by Next.js
+    handle {
+        reverse_proxy web:3000
+    }
+
+    # Global gzip & security headers
+    encode gzip zstd
+    header {
+        X-Content-Type-Options nosniff
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}

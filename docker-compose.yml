@@ -1,0 +1,205 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------
+  # Web Frontend (Next.js - White & Light Blue Modern SaaS)
+  # -------------------------------------------------------------
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: yapayzekacalisan-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - platform-network
+
+  # -------------------------------------------------------------
+  # Platform API (FastAPI)
+  # -------------------------------------------------------------
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: yapayzekacalisan-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/yapayzekacalisan
+      - REDIS_URL=redis://redis:6379/0
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=tenants
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - JWT_SECRET=${JWT_SECRET:-secret-key-change-in-production-12345}
+      - OPENCLAW_GATEWAY_URL=http://openclaw:8080
+      - ENVIRONMENT=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    volumes:
+      - ./apps/api:/app
+      - /data/tenants:/data/tenants
+    networks:
+      - platform-network
+
+  # -------------------------------------------------------------
+  # Background Worker (Celery / Async Task Engine)
+  # -------------------------------------------------------------
+  worker:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: yapayzekacalisan-worker
+    restart: unless-stopped
+    command: celery -A app.worker.celery_app worker --loglevel=info -c 4
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/yapayzekacalisan
+      - REDIS_URL=redis://redis:6379/0
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=tenants
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENCLAW_GATEWAY_URL=http://openclaw:8080
+    depends_on:
+      - api
+      - redis
+      - postgres
+    volumes:
+      - ./apps/api:/app
+      - /data/tenants:/data/tenants
+    networks:
+      - platform-network
+
+  # -------------------------------------------------------------
+  # PostgreSQL with pgvector (Tenant Data & RAG Embeddings)
+  # -------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: yapayzekacalisan-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=yapayzekacalisan
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d yapayzekacalisan"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - platform-network
+
+  # -------------------------------------------------------------
+  # Redis (Queue & Cache)
+  # -------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: yapayzekacalisan-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - platform-network
+
+  # -------------------------------------------------------------
+  # MinIO Object Storage (S3-compatible File & Artifact Storage)
+  # -------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: yapayzekacalisan-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - platform-network
+
+  # -------------------------------------------------------------
+  # OpenClaw Agent Harness / Gateway Service
+  # -------------------------------------------------------------
+  openclaw:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: yapayzekacalisan-openclaw
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    command: python -m app.runtime.standalone_gateway
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENCLAW_PORT=8080
+    volumes:
+      - ./apps/api:/app
+      - /data/tenants:/data/tenants
+    networks:
+      - platform-network
+
+
+  # -------------------------------------------------------------
+  # Caddy Reverse Proxy (Unified Domain & SSL Routing)
+  # -------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    container_name: yapayzekacalisan-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/docker/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+    networks:
+      - platform-network
+
+networks:
+  platform-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  caddy_data:
+  caddy_config:
+
