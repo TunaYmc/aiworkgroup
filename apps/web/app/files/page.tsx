@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { FolderKanban, UploadCloud, FileText, Trash2, Search, CheckCircle2, RefreshCw } from "lucide-react";
-import { api, FileItem } from "@/lib/api";
+import { api, FileItem, getApiUrl } from "@/lib/api";
 
 export default function FilesPage() {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -66,8 +66,7 @@ export default function FilesPage() {
       if (token) headers["Authorization"] = `Bearer ${token}`;
       if (orgId) headers["X-Organization-ID"] = orgId;
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-      const res = await fetch(`${API_URL}/files/upload`, {
+      const res = await fetch(`${getApiUrl()}/files/upload`, {
         method: "POST",
         headers,
         body: formData,

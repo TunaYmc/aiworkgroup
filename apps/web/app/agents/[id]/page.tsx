@@ -19,7 +19,7 @@ import {
   RefreshCw,
   FolderOpen
 } from "lucide-react";
-import { api, Agent } from "@/lib/api";
+import { api, Agent, getApiUrl } from "@/lib/api";
 
 interface ChatMessage {
   id: string;
@@ -117,8 +117,7 @@ export default function AgentWorkspacePage() {
       if (token) headers["Authorization"] = `Bearer ${token}`;
       if (orgId) headers["X-Organization-ID"] = orgId;
 
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-      const res = await fetch(`${API_URL}/agents/${agentId}/chat`, {
+      const res = await fetch(`${getApiUrl()}/agents/${agentId}/chat`, {
         method: "POST",
         headers,
         body: JSON.stringify({ content: userPrompt }),
