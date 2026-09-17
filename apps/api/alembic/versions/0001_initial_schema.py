@@ -18,6 +18,13 @@ def upgrade() -> None:
     # Ensure pgvector extension
     op.execute('CREATE EXTENSION IF NOT EXISTS "vector"')
 
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    tables = inspector.get_table_names()
+    if 'users' in tables:
+        # Schema already initialized by application lifespan
+        return
+
     # 1. Users
     op.create_table(
         'users',
