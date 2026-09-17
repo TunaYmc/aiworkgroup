@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Bot,
   Send,
@@ -17,7 +17,8 @@ import {
   AlertCircle,
   ChevronRight,
   RefreshCw,
-  FolderOpen
+  FolderOpen,
+  LogIn
 } from "lucide-react";
 import { api, Agent, getApiUrl } from "@/lib/api";
 
@@ -34,6 +35,7 @@ interface ChatMessage {
 }
 
 export default function AgentWorkspacePage() {
+  const router = useRouter();
   const params = useParams();
   const agentId = params?.id as string;
 
@@ -43,9 +45,12 @@ export default function AgentWorkspacePage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentToolActivity, setCurrentToolActivity] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState("anthropic/claude-3.7-sonnet");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
     // Fetch Agent details
     api.get<Agent>(`/agents/${agentId}`).then((data) => {
       setAgent(data);
@@ -113,6 +118,21 @@ export default function AgentWorkspacePage() {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const orgId = typeof window !== "undefined" ? localStorage.getItem("currentOrgId") : null;
+
+      if (!token) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsgId
+              ? { ...m, content: "⚠️ Canlı ajana mesaj gönderebilmek için oturum açmalısınız. Giriş sayfasına yönlendiriliyorsunuz..." }
+              : m
+          )
+        );
+        setTimeout(() => {
+          router.push("/login");
+        }, 1200);
+        return;
+      }
+
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
       if (orgId) headers["X-Organization-ID"] = orgId;
@@ -124,6 +144,22 @@ export default function AgentWorkspacePage() {
       });
 
       if (!res.ok || !res.body) {
+        if (res.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("currentOrgId");
+          setIsLoggedIn(false);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, content: "⚠️ Oturum süreniz doldu veya yetkilendirme geçersiz (HTTP 401). Giriş sayfasına yönlendiriliyorsunuz..." }
+                : m
+            )
+          );
+          setTimeout(() => {
+            router.push("/login");
+          }, 1500);
+          return;
+        }
         throw new Error(`Chat isteği başarısız: HTTP ${res.status}`);
       }
 
@@ -288,6 +324,23 @@ export default function AgentWorkspacePage() {
 
         {/* Message Stream */}
         <div className="flex-1 p-6 overflow-y-auto space-y-4">
+          {!isLoggedIn && (
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-800 shadow-xs">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>Ajanla canlı mesajlaşmak ve araçları çalıştırmak için oturum açmalısınız.</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/login")}
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shrink-0 transition flex items-center gap-1 cursor-pointer"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Giriş Yap</span>
+              </button>
+            </div>
+          )}
+
           {messages.map((msg) => {
             const isUser = msg.role === "user";
             return (

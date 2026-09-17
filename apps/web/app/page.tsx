@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -117,11 +118,32 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
     fetchData();
   }, []);
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Auth Warning for Demo Visitors */}
+      {!isLoggedIn && (
+        <div className="bg-amber-50/90 border border-amber-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-amber-900 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold block">Canlı Ajan Bağlantısı İçin Oturum Açın</span>
+              <span className="text-amber-700">Ajanlarla canlı sohbet etmek, görev başlatmak ve dosyalarınızı işlemek için lütfen giriş yapın.</span>
+            </div>
+          </div>
+          <Link
+            href="/login"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shrink-0 shadow-sm shadow-amber-600/20"
+          >
+            Hızlı Giriş Yap →
+          </Link>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-6 rounded-2xl border border-sky-100 shadow-xs">
         <div>

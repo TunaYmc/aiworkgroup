@@ -1,9 +1,24 @@
 "use client";
 
-import React from "react";
-import { Building2, ChevronDown, Bell, Search, Activity } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { Building2, ChevronDown, Bell, Search, LogIn, LogOut } from "lucide-react";
 
 export default function Header() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentOrgId");
+    setIsLoggedIn(false);
+    window.location.href = "/login";
+  };
+
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-10">
       {/* Organization Switcher */}
@@ -42,16 +57,35 @@ export default function Header() {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-sky-500 rounded-full"></span>
         </button>
 
-        {/* User Profile */}
-        <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-xs border border-sky-200">
-            TU
+        {/* User Profile / Auth State */}
+        {isLoggedIn ? (
+          <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
+            <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-xs border border-sky-200">
+              TD
+            </div>
+            <div className="hidden sm:flex flex-col">
+              <span className="text-xs font-semibold text-slate-900 leading-none">Tuna Demir</span>
+              <span className="text-[11px] text-slate-400">Yönetici</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Çıkış Yap"
+              className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition ml-1"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-          <div className="hidden sm:flex flex-col">
-            <span className="text-xs font-semibold text-slate-900 leading-none">Tuna</span>
-            <span className="text-[11px] text-slate-400">Yönetici</span>
+        ) : (
+          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+            <Link
+              href="/login"
+              className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-sky-500/20 transition"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Giriş Yap</span>
+            </Link>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );

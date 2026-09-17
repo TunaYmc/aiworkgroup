@@ -13,8 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeLogin = async (loginEmail: string, loginPass: string) => {
     setError(null);
     setLoading(true);
 
@@ -22,7 +21,7 @@ export default function LoginPage() {
       const res = await fetch(`${getApiUrl()}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: loginEmail, password: loginPass }),
       });
 
       if (!res.ok) {
@@ -41,6 +40,11 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await executeLogin(email, password);
   };
 
   return (
@@ -111,6 +115,46 @@ export default function LoginPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        {/* Quick Demo Access Section */}
+        <div className="pt-4 border-t border-slate-100 space-y-2.5">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center">
+            ⚡ Tek Tıkla Hızlı Test Girişi
+          </p>
+          <div className="grid grid-cols-1 gap-2">
+            <button
+              type="button"
+              onClick={() => executeLogin("demo@acme.com", "Demo12345!")}
+              disabled={loading}
+              className="w-full py-2.5 px-3 bg-sky-50 hover:bg-sky-100/80 border border-sky-200 text-sky-800 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] font-bold">TD</span>
+                <span className="text-left">
+                  <span className="block font-bold">Tuna Demir (Demo Şirket)</span>
+                  <span className="block text-[10px] text-sky-600">demo@acme.com</span>
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-sky-600">Hızlı Giriş →</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => executeLogin("admin@platform.com", "Admin12345!")}
+              disabled={loading}
+              className="w-full py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold">AD</span>
+                <span className="text-left">
+                  <span className="block font-bold">Platform Admin</span>
+                  <span className="block text-[10px] text-slate-500">admin@platform.com</span>
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-slate-500">Hızlı Giriş →</span>
+            </button>
+          </div>
+        </div>
 
         <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
           Henüz şirket hesabınız yok mu?{" "}
