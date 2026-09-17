@@ -26,6 +26,12 @@ async def update_agent_model_config(
         select(Agent).where((Agent.id == agent_id) & (Agent.organization_id == current_org.id))
     )
     agent = result.scalars().first()
+    if not agent and (agent_id.startswith("agent-") or agent_id == "demo-agent"):
+        fallback_res = await db.execute(
+            select(Agent).where(Agent.organization_id == current_org.id).order_by(Agent.created_at.asc())
+        )
+        agent = fallback_res.scalars().first()
+
     if not agent:
         raise HTTPException(status_code=404, detail="Agent bulunamadı")
 

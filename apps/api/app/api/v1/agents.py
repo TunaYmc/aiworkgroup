@@ -204,6 +204,8 @@ async def chat_with_agent(
     # 2. Build context
     context_builder = ContextBuilder(db)
     built_context = await context_builder.build_context(agent, current_task_prompt=message_in.content)
+    if message_in.model:
+        built_context["model"] = message_in.model
 
     async def event_generator():
         runtime = OpenClawRuntimeAdapter()

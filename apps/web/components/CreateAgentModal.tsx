@@ -217,6 +217,8 @@ export default function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateA
               </label>
               <div className="space-y-2.5">
                 {[
+                  { id: "openrouter/free", name: "OpenRouter Free Router", provider: "OpenRouter", tag: "Ücretsiz", desc: "Bakiye gerektirmeyen, OpenRouter üzerindeki en uygun ücretsiz model." },
+                  { id: "meta-llama/llama-3.3-70b-instruct:free", name: "Llama 3.3 70B Instruct", provider: "Meta", tag: "Ücretsiz", desc: "Açık kaynaklı, ücretsiz kota ile kullanılabilen güçlü model." },
                   { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7 Sonnet", provider: "Anthropic", tag: "Tavsiye Edilen", desc: "En yüksek akıl yürütme, Türkçe kabiliyeti ve araç kullanımı." },
                   { id: "openai/gpt-4o", name: "GPT-4o", provider: "OpenAI", tag: "Çok Modlu", desc: "Hızlı yanıt ve genel şirket operasyonları." },
                   { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash", provider: "Google", tag: "Ekonomik", desc: "1M bağlam ve düşük gecikmeli görevler." },

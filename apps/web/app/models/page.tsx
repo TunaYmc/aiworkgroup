@@ -13,6 +13,28 @@ export default function ModelsPage() {
     }).catch(() => {
       setModels([
         {
+          id: "openrouter/free",
+          name: "OpenRouter Free Router",
+          provider: "OpenRouter",
+          context_length: 128000,
+          prompt_price_per_1m: 0.0,
+          completion_price_per_1m: 0.0,
+          description: "Herhangi bir bakiye gerektirmeyen, OpenRouter üzerindeki en uygun ücretsiz modeli otomatik yönlendirir.",
+          supports_tools: true,
+          is_default: false,
+        },
+        {
+          id: "meta-llama/llama-3.3-70b-instruct:free",
+          name: "Llama 3.3 70B Instruct (Ücretsiz)",
+          provider: "Meta",
+          context_length: 128000,
+          prompt_price_per_1m: 0.0,
+          completion_price_per_1m: 0.0,
+          description: "Gelişmiş açık kaynaklı büyük dil modeli (OpenRouter ücretsiz kotası).",
+          supports_tools: true,
+          is_default: false,
+        },
+        {
           id: "anthropic/claude-3.7-sonnet",
           name: "Claude 3.7 Sonnet",
           provider: "Anthropic",

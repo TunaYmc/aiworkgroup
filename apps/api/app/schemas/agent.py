@@ -22,6 +22,7 @@ class AgentUpdate(BaseModel):
 class AgentMessageCreate(BaseModel):
     content: str
     role: str = "user"
+    model: Optional[str] = None
 
 class AgentMessageResponse(BaseModel):
     id: str

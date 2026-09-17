@@ -140,7 +140,7 @@ export default function AgentWorkspacePage() {
       const res = await fetch(`${getApiUrl()}/agents/${agentId}/chat`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ content: userPrompt }),
+        body: JSON.stringify({ content: userPrompt, model: selectedModel }),
       });
 
       if (!res.ok || !res.body) {
@@ -319,6 +319,8 @@ export default function AgentWorkspacePage() {
               onChange={(e) => handleModelChange(e.target.value)}
               className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
+              <option value="openrouter/free">🟢 OpenRouter Free Router (Otomatik Ücretsiz)</option>
+              <option value="meta-llama/llama-3.3-70b-instruct:free">🟢 Llama 3.3 70B (Ücretsiz / Free)</option>
               <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Anthropic)</option>
               <option value="openai/gpt-4o">GPT-4o (OpenAI)</option>
               <option value="openai/gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
