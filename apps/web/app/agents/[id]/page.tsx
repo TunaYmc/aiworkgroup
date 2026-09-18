@@ -473,44 +473,6 @@ export default function AgentWorkspacePage() {
           </form>
         </div>
       </div>
-
-      {/* ---------------- RIGHT PANEL: Task Activity & Artifacts ---------------- */}
-      <div className="w-full md:w-80 bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-xs shrink-0 overflow-y-auto">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-            <FolderOpen className="w-4 h-4 text-sky-600" />
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-700">
-              Oluşturulan Çıktılar & Artifacts
-            </h3>
-          </div>
-
-          <div className="space-y-2">
-            {[
-              { name: "Q3_Kurumsal_Fiyatlandirma.pdf", size: "2.4 MB", date: "Bugün 11:45" },
-              { name: "Maliyet_Analizi.xlsx", size: "480 KB", date: "Dün 16:20" },
-              { name: "Musteri_Teklif_Metni.docx", size: "120 KB", date: "Dün 14:10" }
-            ].map((art, idx) => (
-              <div
-                key={idx}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between hover:bg-sky-50/50 hover:border-sky-200 transition cursor-pointer"
-              >
-                <div className="flex items-center gap-2.5 truncate">
-                  <FileText className="w-4 h-4 text-sky-600 shrink-0" />
-                  <div className="truncate">
-                    <span className="text-xs font-semibold text-slate-800 block truncate">{art.name}</span>
-                    <span className="text-[10px] text-slate-400">{art.size} • {art.date}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="p-3 bg-sky-50/50 rounded-xl border border-sky-100 text-xs text-slate-600 mt-4">
-            <span className="font-bold text-sky-800 block mb-1">Docker Sandbox İzolasyonu</span>
-            Dosyalar doğrudan MinIO S3 uyumlu depolamada saklanır ve yalnızca bu organizasyonun üyeleri tarafından erişilebilir.
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

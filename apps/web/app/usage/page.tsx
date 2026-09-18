@@ -35,9 +35,14 @@ export default function UsagePage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-          Kullanım & Maliyet Yönetimi
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            Kullanım & Maliyet Yönetimi
+          </h1>
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
+            MOCK / TASLAK
+          </span>
+        </div>
         <p className="text-sm text-slate-500 mt-0.5">
           Tüm AI personellerinizin token tüketimi, model harcamaları ve organizasyon bütçe kontrolleri
         </p>

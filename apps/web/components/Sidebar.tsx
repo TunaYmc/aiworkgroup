@@ -18,11 +18,12 @@ import {
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/agents", label: "AI Çalışanlar", icon: Bot },
-  { href: "/tasks", label: "Görev Havuzu", icon: CheckSquare },
+  { href: "/tasks", label: "Görev Havuzu", icon: CheckSquare, badge: "MOCK" },
   { href: "/files", label: "Dökümanlar & RAG", icon: FolderKanban },
   { href: "/models", label: "Model Kataloğu", icon: Cpu },
-  { href: "/usage", label: "Kullanım & Maliyet", icon: BarChart3 },
-  { href: "/settings", label: "Ayarlar", icon: Settings },
+  { href: "/usage", label: "Kullanım & Maliyet", icon: BarChart3, badge: "MOCK" },
+  { href: "/settings", label: "Ayarlar", icon: Settings, badge: "MOCK" },
+  { href: "/admin", label: "Süper Yönetici", icon: ShieldCheck, badge: "MOCK" },
 ];
 
 export default function Sidebar() {
@@ -57,14 +58,21 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 isActive
                   ? "bg-sky-50 text-sky-700 font-semibold shadow-xs border border-sky-100"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? "text-sky-600" : "text-slate-400"}`} />
-              <span>{item.label}</span>
+              <div className="flex items-center gap-3">
+                <Icon className={`w-4 h-4 ${isActive ? "text-sky-600" : "text-slate-400"}`} />
+                <span>{item.label}</span>
+              </div>
+              {item.badge && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100/80 text-amber-800 border border-amber-200 uppercase tracking-wider">
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         })}

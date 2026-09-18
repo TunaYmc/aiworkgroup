@@ -43,10 +43,15 @@ export default function AdminPage() {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              Platform Süper Yönetici Masası (Admin)
-            </h1>
-            <p className="text-xs text-slate-500">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                Platform Süper Yönetici Masası (Admin)
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
+                MOCK / TASLAK
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
               Tüm şirket tenant'ları, worker kuyrukları ve global model bütçe kontrolü
             </p>
           </div>

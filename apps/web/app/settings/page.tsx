@@ -15,13 +15,23 @@ export default function SettingsPage() {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-          Organizasyon & Platform Ayarları
-        </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            Organizasyon & Platform Ayarları
+          </h1>
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
+            MOCK / TASLAK
+          </span>
+        </div>
+        <p className="text-sm text-slate-500">
           Tenant yapılandırması, API anahtarları ve erişim denetimi
         </p>
+
+        <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
+          <span className="font-bold">⚠️ Not:</span>
+          <span>Bu sayfa şu an prototip/mock aşamasındadır. Şirket adı ve API anahtarı ayarları henüz kalıcı veritabanına bağlanmamıştır.</span>
+        </div>
       </div>
 
       {/* Organization Info Card */}
