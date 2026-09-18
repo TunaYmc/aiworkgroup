@@ -201,7 +201,15 @@ async def chat_with_agent(
     db.add(user_msg)
     await db.commit()
 
-    # 2. Build context
+    # 2. Persist chosen model if provided
+    if message_in.model:
+        current_config = dict(agent.model_config_data or {})
+        if current_config.get("primary_model") != message_in.model:
+            current_config["primary_model"] = message_in.model
+            agent.model_config_data = current_config
+            await db.commit()
+
+    # 3. Build context
     context_builder = ContextBuilder(db)
     built_context = await context_builder.build_context(agent, current_task_prompt=message_in.content)
     if message_in.model:

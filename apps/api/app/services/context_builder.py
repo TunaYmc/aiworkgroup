@@ -24,9 +24,11 @@ class ContextBuilder:
         organization_id = agent.organization_id
 
         # 1. System Instructions & Agent Persona
+        active_model = agent.model_config_data.get("primary_model", "anthropic/claude-3.7-sonnet")
         system_content = [
             f"# AGENT PERSONA & ROLE: {agent.name} ({agent.role})",
             agent.system_instructions.strip(),
+            f"\n# CURRENT RUNTIME INFERENCE MODEL:\n- Aktif çalışan yapay zeka modelin: '{active_model}'. Kullanıcı sana hangi modeli kullandığını sorduğunda bu modeli belirt.",
             "\n# SECURITY & OPERATIONAL GUIDELINES:",
             "- Sen şirkete ait özel ve güvenli bir dijital AI çalışanısın.",
             "- Yalnızca sana atanmış organizasyon ve agent dökümanlarına erişebilirsin.",

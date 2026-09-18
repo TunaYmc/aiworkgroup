@@ -113,11 +113,13 @@ class ApiClient {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    if (this.token) {
-      headers["Authorization"] = `Bearer ${this.token}`;
+    const token = typeof window !== "undefined" ? (localStorage.getItem("token") || this.token) : this.token;
+    const orgId = typeof window !== "undefined" ? (localStorage.getItem("currentOrgId") || this.currentOrgId) : this.currentOrgId;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
     }
-    if (this.currentOrgId) {
-      headers["X-Organization-ID"] = this.currentOrgId;
+    if (orgId) {
+      headers["X-Organization-ID"] = orgId;
     }
     return headers;
   }

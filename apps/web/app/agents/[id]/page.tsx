@@ -395,7 +395,13 @@ export default function AgentWorkspacePage() {
             <Sparkles className="w-4 h-4 text-sky-600" />
             <h3 className="font-bold text-sm text-slate-900">Çalışma Sohbeti & Canlı Görev</h3>
           </div>
-          <div className="text-xs text-slate-400">Tenant İzolasyonu Devrede</div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+              Aktif Model: <strong className="text-slate-800">{selectedModel}</strong>
+            </span>
+            <div className="text-xs text-slate-400 hidden md:block">Tenant İzolasyonu Devrede</div>
+          </div>
         </div>
 
         {/* Message Stream */}
