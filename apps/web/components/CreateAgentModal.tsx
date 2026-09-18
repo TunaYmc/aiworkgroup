@@ -217,15 +217,14 @@ export default function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateA
               </label>
               <div className="space-y-2.5">
                 {[
-                  { id: "google/gemini-3.1-pro", name: "Gemini 3.1 Pro", provider: "Google", tag: "Yüksek Tier", desc: "1M bağlam, derin problem çözme ve en gelişmiş muhakeme." },
+                  { id: "openai/gpt-6-astra-pro", name: "GPT-6 Astra Pro", provider: "OpenAI", tag: "Pro Reasoning", desc: "1M bağlam, en gelişmiş Astra akıl yürütme ve otonom iş gücü." },
+                  { id: "openai/gpt-6-astra", name: "GPT-6 Astra", provider: "OpenAI", tag: "Flagship", desc: "1M bağlam, uçtan uca kurumsal operasyonlar ve veri sentezi." },
+                  { id: "anthropic/claude-fable-5.1", name: "Claude Fable 5.1", provider: "Anthropic", tag: "Mythos Tier", desc: "Otonom bilgi işleme, derin yazılım mimarisi ve uzun ajan akışları." },
+                  { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7 Sonnet", provider: "Anthropic", tag: "Hibrit Mantık", desc: "Gelişmiş hibrit akıl yürütme ve problem çözme." },
+                  { id: "google/gemini-3.1-pro", name: "Gemini 3.1 Pro", provider: "Google", tag: "Yüksek Tier", desc: "1M bağlam, derin muhakeme ve büyük veri analizi." },
                   { id: "google/gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "Google", tag: "Orta Tier", desc: "1M bağlam, ultra hızlı ve dengeli yeni nesil yapay zeka." },
-                  { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash", provider: "Google", tag: "Düşük / Hızlı", desc: "1M bağlam, düşük maliyet ve yüksek hız." },
-                  { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7 Sonnet", provider: "Anthropic", tag: "Yüksek Tier", desc: "Hibrit akıl yürütme, en gelişmiş kodlama ve analiz." },
-                  { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet", provider: "Anthropic", tag: "Orta Tier", desc: "Güçlü kurumsal operasyonlar ve mükemmel Türkçe." },
-                  { id: "openai/o3-mini", name: "OpenAI o3-mini", provider: "OpenAI", tag: "Yüksek Tier", desc: "STEM, matematik ve adım adım analitik düşünme." },
-                  { id: "openai/gpt-4o", name: "GPT-4o Omnimodel", provider: "OpenAI", tag: "Orta Tier", desc: "Çok modlu genel amaçlı kurumsal personel." },
-                  { id: "deepseek/deepseek-r1", name: "DeepSeek R1", provider: "DeepSeek", tag: "Yüksek Tier", desc: "Açık kaynak derin mantık ağı ve algoritma uzmanı." },
-                  { id: "deepseek/deepseek-chat", name: "DeepSeek V3", provider: "DeepSeek", tag: "Orta Tier", desc: "Ekonomik, son derece hızlı ve akıllı genel amaçlı model." },
+                  { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro", provider: "DeepSeek", tag: "MoE Reasoning", desc: "Geniş ölçekli MoE, açık mantık ağı ve algoritmik denetim." },
+                  { id: "deepseek/deepseek-v4.1-flash", name: "DeepSeek V4.1 Flash", provider: "DeepSeek", tag: "CED Agentic", desc: "Causal Encoder-Decoder mimarili hızlı ajan motoru." },
                   { id: "openrouter/free", name: "OpenRouter Free Router", provider: "OpenRouter", tag: "Ücretsiz", desc: "Bakiye gerektirmeyen otomatik en uygun ücretsiz model." },
                   { id: "meta-llama/llama-3.3-70b-instruct:free", name: "Llama 3.3 70B Instruct", provider: "Meta", tag: "Ücretsiz", desc: "Açık kaynaklı, ücretsiz kota ile kullanılabilen güçlü model." }
                 ].map((m) => (
