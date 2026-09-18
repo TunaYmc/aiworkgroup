@@ -319,13 +319,30 @@ export default function AgentWorkspacePage() {
               onChange={(e) => handleModelChange(e.target.value)}
               className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
             >
-              <option value="openrouter/free">🟢 OpenRouter Free Router (Otomatik Ücretsiz)</option>
-              <option value="meta-llama/llama-3.3-70b-instruct:free">🟢 Llama 3.3 70B (Ücretsiz / Free)</option>
-              <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Anthropic)</option>
-              <option value="openai/gpt-4o">GPT-4o (OpenAI)</option>
-              <option value="openai/gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
-              <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (Google)</option>
-              <option value="deepseek/deepseek-r1">DeepSeek R1 (DeepSeek)</option>
+              <optgroup label="🌐 Google Gemini">
+                <option value="google/gemini-3.1-pro">Gemini 3.1 Pro (Yüksek / High Tier)</option>
+                <option value="google/gemini-3.8-flash">Gemini 3.8 Flash (Orta / Mid Tier)</option>
+                <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (Düşük / Hızlı Tier)</option>
+              </optgroup>
+              <optgroup label="🧠 Anthropic Claude">
+                <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Yüksek / High Tier)</option>
+                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Orta / Mid Tier)</option>
+                <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku (Düşük / Hızlı Tier)</option>
+              </optgroup>
+              <optgroup label="🤖 OpenAI">
+                <option value="openai/o3-mini">OpenAI o3-mini (Yüksek / Reasoning Tier)</option>
+                <option value="openai/gpt-4o">GPT-4o Omnimodel (Orta / Mid Tier)</option>
+                <option value="openai/gpt-4o-mini">GPT-4o Mini (Düşük / Hızlı Tier)</option>
+              </optgroup>
+              <optgroup label="⚡ DeepSeek">
+                <option value="deepseek/deepseek-r1">DeepSeek R1 (Yüksek / High Reasoning)</option>
+                <option value="deepseek/deepseek-chat">DeepSeek V3 (Orta / Mid Tier)</option>
+                <option value="deepseek/deepseek-r1-distill-llama-70b">DeepSeek R1 Distill 70B (Düşük Tier)</option>
+              </optgroup>
+              <optgroup label="🟢 Ücretsiz / Kotasız Modeller">
+                <option value="openrouter/free">OpenRouter Free Router (Otomatik Ücretsiz)</option>
+                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Instruct (Ücretsiz / Free)</option>
+              </optgroup>
             </select>
             <span className="text-[10px] text-slate-400 block">
               Model değiştiğinde sohbet geçmişi ve agent hafızası korunur.

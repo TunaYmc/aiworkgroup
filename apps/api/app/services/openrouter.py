@@ -10,33 +10,110 @@ from app.services.tools.registry import tool_registry
 logger = logging.getLogger(__name__)
 
 MODEL_CATALOG = [
+    # ---------------- GOOGLE (GEMINI) ----------------
+    {
+        "id": "google/gemini-3.1-pro",
+        "name": "Gemini 3.1 Pro (Yüksek / High Tier)",
+        "provider": "Google",
+        "context_length": 1000000,
+        "prompt_price_per_1m": 1.25,
+        "completion_price_per_1m": 5.0,
+        "description": "Google'ın en gelişmiş derin akıl yürütme, problem çözme ve büyük veri analiz modeli (1M Context).",
+        "supports_tools": True,
+        "supports_vision": True,
+        "is_default": False
+    },
+    {
+        "id": "google/gemini-3.8-flash",
+        "name": "Gemini 3.8 Flash (Orta / Mid Tier)",
+        "provider": "Google",
+        "context_length": 1000000,
+        "prompt_price_per_1m": 0.35,
+        "completion_price_per_1m": 1.05,
+        "description": "Yüksek hızlı, çok modlu ve dengeli yeni nesil kurumsal yapay zeka personeli (1M Context).",
+        "supports_tools": True,
+        "supports_vision": True,
+        "is_default": False
+    },
+    {
+        "id": "google/gemini-2.0-flash-001",
+        "name": "Gemini 2.0 Flash (Düşük / Hızlı Tier)",
+        "provider": "Google",
+        "context_length": 1000000,
+        "prompt_price_per_1m": 0.10,
+        "completion_price_per_1m": 0.40,
+        "description": "1 Milyon token bağlam penceresi, ultra düşük gecikme ve yüksek ekonomik verim.",
+        "supports_tools": True,
+        "supports_vision": True,
+        "is_default": False
+    },
+
+    # ---------------- ANTHROPIC (CLAUDE) ----------------
     {
         "id": "anthropic/claude-3.7-sonnet",
-        "name": "Claude 3.7 Sonnet (Hybrid Reasoning)",
+        "name": "Claude 3.7 Sonnet (Yüksek / High Tier)",
         "provider": "Anthropic",
         "context_length": 200000,
         "prompt_price_per_1m": 3.0,
         "completion_price_per_1m": 15.0,
-        "description": "En üst düzey mantık yürütme, kod yazma ve derin problem çözme modeli.",
+        "description": "En üst düzey hibrit mantık yürütme, kod yazma ve derin problem çözme modeli.",
         "supports_tools": True,
         "supports_vision": True,
         "is_default": True
     },
     {
+        "id": "anthropic/claude-3.5-sonnet",
+        "name": "Claude 3.5 Sonnet (Orta / Mid Tier)",
+        "provider": "Anthropic",
+        "context_length": 200000,
+        "prompt_price_per_1m": 3.0,
+        "completion_price_per_1m": 15.0,
+        "description": "Gelişmiş kurumsal görev yürütme, döküman sentezi ve mükemmel Türkçe kabiliyeti.",
+        "supports_tools": True,
+        "supports_vision": True,
+        "is_default": False
+    },
+    {
+        "id": "anthropic/claude-3.5-haiku",
+        "name": "Claude 3.5 Haiku (Düşük / Hızlı Tier)",
+        "provider": "Anthropic",
+        "context_length": 200000,
+        "prompt_price_per_1m": 0.80,
+        "completion_price_per_1m": 4.0,
+        "description": "Yüksek hızlı özetleme, hızlı veri sınıflandırma ve hafif asistan operasyonları.",
+        "supports_tools": True,
+        "supports_vision": False,
+        "is_default": False
+    },
+
+    # ---------------- OPENAI ----------------
+    {
+        "id": "openai/o3-mini",
+        "name": "OpenAI o3-mini (Yüksek / Reasoning Tier)",
+        "provider": "OpenAI",
+        "context_length": 200000,
+        "prompt_price_per_1m": 1.10,
+        "completion_price_per_1m": 4.40,
+        "description": "Karmaşık mantık, matematik, kodlama ve adım adım analitik düşünme modeli.",
+        "supports_tools": True,
+        "supports_vision": False,
+        "is_default": False
+    },
+    {
         "id": "openai/gpt-4o",
-        "name": "GPT-4o Omnimodel",
+        "name": "GPT-4o Omnimodel (Orta / Mid Tier)",
         "provider": "OpenAI",
         "context_length": 128000,
         "prompt_price_per_1m": 2.5,
         "completion_price_per_1m": 10.0,
-        "description": "Çok modlu ve genel amaçlı hızlı kurumsal yapay zeka.",
+        "description": "Çok modlu ve genel amaçlı hızlı kurumsal yapay zeka personeli.",
         "supports_tools": True,
         "supports_vision": True,
         "is_default": False
     },
     {
         "id": "openai/gpt-4o-mini",
-        "name": "GPT-4o Mini (Hızlı & Ekonomik)",
+        "name": "GPT-4o Mini (Düşük / Hızlı Tier)",
         "provider": "OpenAI",
         "context_length": 128000,
         "prompt_price_per_1m": 0.15,
@@ -46,30 +123,46 @@ MODEL_CATALOG = [
         "supports_vision": True,
         "is_default": False
     },
-    {
-        "id": "google/gemini-2.0-flash-001",
-        "name": "Gemini 2.0 Flash",
-        "provider": "Google",
-        "context_length": 1000000,
-        "prompt_price_per_1m": 0.10,
-        "completion_price_per_1m": 0.40,
-        "description": "1 Milyon token bağlam penceresi ve ultra düşük gecikme süresi.",
-        "supports_tools": True,
-        "supports_vision": True,
-        "is_default": False
-    },
+
+    # ---------------- DEEPSEEK ----------------
     {
         "id": "deepseek/deepseek-r1",
-        "name": "DeepSeek R1 (Açık Mantık Ağı)",
+        "name": "DeepSeek R1 (Yüksek / High Reasoning)",
         "provider": "DeepSeek",
         "context_length": 64000,
         "prompt_price_per_1m": 0.55,
         "completion_price_per_1m": 2.19,
-        "description": "Matematik, algoritma ve karmaşık muhasebe denetimi için optimize edilmiş akıl yürütme.",
+        "description": "Açık mantık ağı; matematik, algoritma ve karmaşık muhasebe denetimi için optimize akıl yürütme.",
         "supports_tools": True,
         "supports_vision": False,
         "is_default": False
     },
+    {
+        "id": "deepseek/deepseek-chat",
+        "name": "DeepSeek V3 (Orta / Mid Tier)",
+        "provider": "DeepSeek",
+        "context_length": 64000,
+        "prompt_price_per_1m": 0.14,
+        "completion_price_per_1m": 0.28,
+        "description": "Son derece hızlı ve güçlü genel amaçlı çok dilli dil modeli.",
+        "supports_tools": True,
+        "supports_vision": False,
+        "is_default": False
+    },
+    {
+        "id": "deepseek/deepseek-r1-distill-llama-70b",
+        "name": "DeepSeek R1 Distill 70B (Düşük / Hızlı Tier)",
+        "provider": "DeepSeek",
+        "context_length": 64000,
+        "prompt_price_per_1m": 0.23,
+        "completion_price_per_1m": 0.69,
+        "description": "Llama mimarisi üzerine damıtılmış ekonomik ve hızlı akıl yürütme modeli.",
+        "supports_tools": True,
+        "supports_vision": False,
+        "is_default": False
+    },
+
+    # ---------------- FREE TIER / ÜCRETSİZ MODELLER ----------------
     {
         "id": "openrouter/free",
         "name": "OpenRouter Free Router (Otomatik Ücretsiz Model)",
@@ -84,7 +177,7 @@ MODEL_CATALOG = [
     },
     {
         "id": "meta-llama/llama-3.3-70b-instruct:free",
-        "name": "Llama 3.3 70B Instruct (Ücretsiz)",
+        "name": "Llama 3.3 70B Instruct (Ücretsiz / Free)",
         "provider": "Meta",
         "context_length": 128000,
         "prompt_price_per_1m": 0.0,
