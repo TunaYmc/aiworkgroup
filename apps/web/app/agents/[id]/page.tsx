@@ -332,6 +332,7 @@ export default function AgentWorkspacePage() {
               <optgroup label="🌐 Google (Gemini)">
                 <option value="google/gemini-3.1-pro">Gemini 3.1 Pro (Yüksek / 1M Context)</option>
                 <option value="google/gemini-3.8-flash">Gemini 3.8 Flash (Orta / 1M Context)</option>
+                <option value="google/gemini-3.7-flash">Gemini 3.7 Flash (Orta / Hibrit Zeka)</option>
                 <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (Düşük / Hızlı)</option>
               </optgroup>
               <optgroup label="⚡ DeepSeek (V4 Series)">

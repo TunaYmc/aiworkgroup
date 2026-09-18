@@ -214,16 +214,18 @@ class OpenRouterService:
         """
         Non-streaming call to OpenRouter with optional tool schemas.
         """
-        # Map mock model IDs to real OpenRouter model IDs
+        # Map model IDs to real OpenRouter model IDs
         MODEL_MAPPING = {
-            "openai/gpt-6-astra-pro": "openai/o3-mini",
-            "openai/gpt-6-astra": "openai/gpt-4o",
-            "anthropic/claude-fable-5.1": "anthropic/claude-3.5-sonnet",
-            "google/gemini-3.1-pro": "google/gemini-1.5-pro",
-            "google/gemini-3.8-flash": "google/gemini-2.0-flash-001",
-            "deepseek/deepseek-v4-pro": "deepseek/deepseek-r1",
-            "deepseek/deepseek-v4.1-flash": "deepseek/deepseek-chat",
-            "deepseek/deepseek-v4-flash": "deepseek/deepseek-chat"
+            "google/gemini-3.1-pro": "google/gemini-3.1-pro-preview",
+            "google/gemini-3.7-flash": "google/gemini-3.7-flash",
+            "google/gemini-3.8-flash": "google/gemini-3.8-flash",
+            "google/gemini-3.5-flash": "google/gemini-3.5-flash",
+            "openai/gpt-6-astra-pro": "openai/gpt-6-astra-pro",
+            "openai/gpt-6-astra": "openai/gpt-6-astra",
+            "anthropic/claude-fable-5.1": "anthropic/claude-fable-5.1",
+            "deepseek/deepseek-v4-pro": "deepseek/deepseek-v4-pro",
+            "deepseek/deepseek-v4.1-flash": "deepseek/deepseek-v4.1-flash",
+            "deepseek/deepseek-v4-flash": "deepseek/deepseek-v4-flash"
         }
         
         actual_model = MODEL_MAPPING.get(model, model)
