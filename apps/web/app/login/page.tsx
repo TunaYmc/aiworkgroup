@@ -18,15 +18,28 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${getApiUrl()}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail, password: loginPass }),
-      });
+      const apiUrl = getApiUrl();
+      const loginUrl = `${apiUrl}/auth/login`;
+      
+      let res;
+      try {
+        res = await fetch(loginUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: loginEmail, password: loginPass }),
+        });
+      } catch (fetchErr: any) {
+        throw new Error(`Bağlantı hatası: Sunucuya ulaşılamadı. Adres: ${loginUrl}. Detay: ${fetchErr.message}`);
+      }
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || "Giriş başarısız. Lütfen bilgilerinizi kontrol edin.");
+        let errData = {};
+        try {
+          errData = await res.json();
+        } catch (e) {
+          // ignore json parse error
+        }
+        throw new Error((errData as any).detail || `HTTP Hata ${res.status}: Sunucu isteği reddetti.`);
       }
 
       const data = await res.json();
