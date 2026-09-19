@@ -27,8 +27,9 @@ git pull origin main
 echo "🔨 2/5: Konteynerler yeniden derleniyor..."
 docker compose build
 
-# 3. Servisleri sıfır kesintiye yakın yeniden başlat
-echo "🚀 3/5: Servisler yeniden başlatılıyor..."
+# 3. Servisleri tam ve temiz olarak yeniden başlat
+echo "🚀 3/5: Servisler tam ve temiz olarak yeniden başlatılıyor..."
+docker compose down
 docker compose up -d --remove-orphans
 
 # 4. Veritabanı migration'larını çalıştır
