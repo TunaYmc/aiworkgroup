@@ -1,21 +1,9 @@
 export const getApiUrl = () => {
   if (typeof window !== "undefined") {
-    if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("localhost")) {
-      return process.env.NEXT_PUBLIC_API_URL;
-    }
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    const port = window.location.port;
-
-    // If accessed through reverse proxy (e.g., port 80/443 without explicit port)
-    if (port === "80" || port === "443" || port === "") {
-      return `${protocol}//${window.location.host}/api/v1`;
-    }
-
-    // Direct access to frontend dev port 3000 -> API is on port 8000
-    return `${protocol}//${hostname}:8000/api/v1`;
+    return "/api/v1";
   }
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  const internalUrl = process.env.INTERNAL_API_URL || "http://api:8000";
+  return `${internalUrl}/api/v1`;
 };
 
 export interface Agent {
