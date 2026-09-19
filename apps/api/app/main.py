@@ -43,6 +43,42 @@ async def lifespan(app: FastAPI):
         logger.info("Database initialized successfully.")
     except Exception as e:
         logger.warning(f"Database initialization deferred: {e}")
+
+    # Sync existing knowledge documents to tenant filesystem
+    try:
+        from app.core.database import AsyncSessionLocal
+        from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
+        import os
+        async with AsyncSessionLocal() as session:
+            doc_res = await session.execute(select(KnowledgeDocument))
+            docs = doc_res.scalars().all()
+            for doc in docs:
+                c_res = await session.execute(
+                    select(KnowledgeChunk)
+                    .where(KnowledgeChunk.document_id == doc.id)
+                    .order_by(KnowledgeChunk.chunk_index.asc())
+                )
+                chunks = c_res.scalars().all()
+                if chunks:
+                    doc_text = "\n\n".join(c.content for c in chunks)
+                    clean_stem = os.path.splitext(os.path.basename(doc.title))[0]
+                    txt_name = f"{clean_stem}.txt"
+                    tenant_docs = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, doc.organization_id, "documents")
+                    os.makedirs(tenant_docs, exist_ok=True)
+                    with open(os.path.join(tenant_docs, txt_name), "w", encoding="utf-8") as f_out:
+                        f_out.write(doc_text)
+
+                    agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, doc.organization_id, "agents")
+                    if os.path.exists(agents_dir):
+                        for ag in os.listdir(agents_dir):
+                            ag_docs = os.path.join(agents_dir, ag, "workspace", "documents")
+                            os.makedirs(ag_docs, exist_ok=True)
+                            with open(os.path.join(ag_docs, txt_name), "w", encoding="utf-8") as f_ag:
+                                f_ag.write(doc_text)
+        logger.info("Knowledge documents synced to workspace filesystem successfully.")
+    except Exception as sync_err:
+        logger.warning(f"Document filesystem sync deferred: {sync_err}")
+
     yield
     await engine.dispose()
 

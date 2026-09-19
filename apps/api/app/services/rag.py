@@ -24,8 +24,8 @@ class RAGService:
         query: str,
         organization_id: str,
         agent_id: Optional[str] = None,
-        limit: int = 5,
-        min_similarity: float = 0.2
+        limit: int = 6,
+        min_similarity: float = 0.05
     ) -> List[Dict[str, Any]]:
         if not query.strip():
             return []
@@ -42,28 +42,59 @@ class RAGService:
         result = await db.execute(stmt)
         chunks = result.scalars().all()
 
+        if not chunks:
+            return []
+
+        query_clean = query.lower()
+        query_words = [w.strip(".,?!:;\"'()") for w in query_clean.split() if len(w.strip(".,?!:;\"'()")) >= 2]
+        is_document_intent = any(kw in query_clean for kw in ["dosya", "doküman", "dokuman", "belge", "bilgi", "fiyat", "liste", "rapor", "prosedür", "özet", "pdf", "docx", "oku", "neler var", "yükle"])
+
         scored_chunks = []
         for chunk in chunks:
-            if chunk.embedding is not None:
-                sim = cosine_similarity(query_vector, list(chunk.embedding))
-            else:
-                # Text token overlap fallback if embedding was not set
-                query_words = set(query.lower().split())
-                chunk_words = set(chunk.content.lower().split())
-                overlap = len(query_words.intersection(chunk_words))
-                sim = overlap / max(len(query_words), 1)
+            chunk_content_lower = chunk.content.lower()
+            filename = (chunk.metadata_json or {}).get("filename", "Belge")
+            filename_lower = filename.lower()
 
-            if sim >= min_similarity:
+            # Vector similarity
+            sim = 0.0
+            if chunk.embedding is not None:
+                sim = max(0.0, cosine_similarity(query_vector, list(chunk.embedding)))
+
+            # Keyword overlap
+            kw_matches = sum(1 for w in query_words if w in chunk_content_lower)
+            kw_score = (kw_matches / max(len(query_words), 1)) if query_words else 0.0
+
+            # Filename relevance boost
+            filename_boost = 0.3 if any(w in filename_lower for w in query_words) else 0.0
+
+            # Hybrid score
+            combined_score = (0.4 * sim) + (0.4 * kw_score) + filename_boost
+
+            # Keep chunk if it passes threshold or if there's clear document intent and it's an initial chunk
+            if combined_score >= min_similarity or kw_matches > 0 or (is_document_intent and chunk.chunk_index == 0):
                 scored_chunks.append({
                     "chunk_id": chunk.id,
                     "content": chunk.content,
-                    "similarity": round(sim, 4),
+                    "similarity": round(max(combined_score, sim), 4),
                     "metadata": chunk.metadata_json or {},
-                    "filename": (chunk.metadata_json or {}).get("filename", "Belge")
+                    "filename": filename
                 })
 
-        # Sort by highest similarity first
+        # Sort by highest score first
         scored_chunks.sort(key=lambda x: x["similarity"], reverse=True)
+
+        # If document intent was requested but no chunk passed, fall back to top initial chunks
+        if not scored_chunks and chunks and is_document_intent:
+            initial_chunks = [c for c in chunks if c.chunk_index == 0][:limit]
+            for c in initial_chunks:
+                scored_chunks.append({
+                    "chunk_id": c.id,
+                    "content": c.content,
+                    "similarity": 0.1,
+                    "metadata": c.metadata_json or {},
+                    "filename": (c.metadata_json or {}).get("filename", "Belge")
+                })
+
         return scored_chunks[:limit]
 
 rag_service = RAGService()

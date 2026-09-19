@@ -62,6 +62,39 @@ async def upload_file(
     agent_file.storage_key = storage_key
     await db.commit()
 
+    import io
+    import os
+    from app.core.config import settings
+
+    # 1. Upload to S3/MinIO
+    try:
+        storage_service.upload_file(io.BytesIO(content), storage_key, agent_file.mime_type)
+    except Exception as s3_err:
+        pass
+
+    # 2. Save file to tenant documents directory for filesystem tool access
+    clean_filename = os.path.basename(agent_file.filename)
+    tenant_docs_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, current_org.id, "documents")
+    os.makedirs(tenant_docs_dir, exist_ok=True)
+    dest_path = os.path.join(tenant_docs_dir, clean_filename)
+    try:
+        with open(dest_path, "wb") as f_out:
+            f_out.write(content)
+    except Exception:
+        pass
+
+    # 3. Mirror file into agent workspaces
+    agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, current_org.id, "agents")
+    if os.path.exists(agents_dir):
+        for ag_dir in os.listdir(agents_dir):
+            ag_ws_docs = os.path.join(agents_dir, ag_dir, "workspace", "documents")
+            os.makedirs(ag_ws_docs, exist_ok=True)
+            try:
+                with open(os.path.join(ag_ws_docs, clean_filename), "wb") as f_ag:
+                    f_ag.write(content)
+            except Exception:
+                pass
+
     # Ingest document text for RAG
     await ingestion_service.ingest_file(db, agent_file, content)
 

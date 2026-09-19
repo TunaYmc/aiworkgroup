@@ -46,6 +46,30 @@ class DocumentIngestionService:
                 await db.commit()
                 return True
 
+            # Save parsed plain text to disk for direct filesystem access
+            import os
+            from app.core.config import settings
+            clean_base = os.path.splitext(os.path.basename(agent_file.filename))[0]
+            txt_filename = f"{clean_base}.txt"
+            tenant_docs = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, agent_file.organization_id, "documents")
+            os.makedirs(tenant_docs, exist_ok=True)
+            try:
+                with open(os.path.join(tenant_docs, txt_filename), "w", encoding="utf-8") as f_txt:
+                    f_txt.write(raw_text)
+            except Exception:
+                pass
+
+            agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, agent_file.organization_id, "agents")
+            if os.path.exists(agents_dir):
+                for ag_dir in os.listdir(agents_dir):
+                    ag_ws_docs = os.path.join(agents_dir, ag_dir, "workspace", "documents")
+                    os.makedirs(ag_ws_docs, exist_ok=True)
+                    try:
+                        with open(os.path.join(ag_ws_docs, txt_filename), "w", encoding="utf-8") as f_ag_txt:
+                            f_ag_txt.write(raw_text)
+                    except Exception:
+                        pass
+
             # 2. Chunk text
             chunks = self.chunk_text(raw_text)
             if not chunks:

@@ -25,7 +25,7 @@ def _resolve_safe_path(requested_path: str, workspace_path: str) -> str:
 
 class ListFilesTool(BaseTool):
     name = "list_files"
-    description = "List all files and directories in the agent workspace or specified subdirectory."
+    description = "List all files and directories in the agent workspace or specified subdirectory (including uploaded company documents)."
     parameters_schema = {
         "type": "object",
         "properties": {
@@ -38,44 +38,94 @@ class ListFilesTool(BaseTool):
         subpath = params.get("subpath", ".")
         target_dir = _resolve_safe_path(subpath, workspace)
 
-        if not os.path.exists(target_dir):
-            return {"error": f"Directory '{subpath}' does not exist."}
-
         entries = []
-        for item in os.listdir(target_dir):
-            item_path = os.path.join(target_dir, item)
-            entries.append({
-                "name": item,
-                "is_dir": os.path.isdir(item_path),
-                "size_bytes": os.path.getsize(item_path) if os.path.isfile(item_path) else 0
-            })
+        if os.path.exists(target_dir):
+            for item in os.listdir(target_dir):
+                item_path = os.path.join(target_dir, item)
+                entries.append({
+                    "name": item,
+                    "is_dir": os.path.isdir(item_path),
+                    "size_bytes": os.path.getsize(item_path) if os.path.isfile(item_path) else 0
+                })
+
+        # If listing root, also surface files in documents/ folder
+        docs_dir = os.path.join(workspace, "documents")
+        if subpath in (".", "") and os.path.exists(docs_dir):
+            for item in os.listdir(docs_dir):
+                item_path = os.path.join(docs_dir, item)
+                if os.path.isfile(item_path):
+                    entries.append({
+                        "name": f"documents/{item}",
+                        "is_dir": False,
+                        "size_bytes": os.path.getsize(item_path)
+                    })
+
         return {"directory": subpath, "entries": entries, "count": len(entries)}
 
 class FileReadTool(BaseTool):
     name = "file_read"
-    description = "Read the text contents of a file inside the agent workspace."
+    description = "Read the text contents of a file inside the agent workspace or company documents (supports PDF, DOCX, XLSX, TXT)."
     parameters_schema = {
         "type": "object",
         "properties": {
-            "filepath": {"type": "string", "description": "Path to the file relative to workspace root"}
+            "filepath": {"type": "string", "description": "Path or name of the file to read"}
         },
         "required": ["filepath"]
     }
 
     async def execute(self, params: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         workspace = context.get("workspace_path", "/tmp/sandbox")
-        filepath = params.get("filepath", "")
+        filepath = params.get("filepath", "").strip()
         if not filepath:
             return {"error": "filepath parameter is required"}
 
-        safe_path = _resolve_safe_path(filepath, workspace)
-        if not os.path.isfile(safe_path):
-            return {"error": f"File '{filepath}' not found."}
+        # Candidate paths to locate file
+        base_name = os.path.basename(filepath)
+        clean_stem = os.path.splitext(base_name)[0]
+        candidates = [
+            _resolve_safe_path(filepath, workspace),
+            os.path.join(workspace, "documents", filepath),
+            os.path.join(workspace, "documents", base_name),
+            os.path.join(workspace, "documents", f"{clean_stem}.txt"),
+            os.path.join(workspace, f"{clean_stem}.txt"),
+        ]
+
+        found_path = None
+        for cand in candidates:
+            if os.path.isfile(cand):
+                found_path = cand
+                break
+
+        if not found_path:
+            # Check tenant documents directory
+            org_id = context.get("organization_id")
+            if org_id:
+                from app.core.config import settings
+                tenant_cand = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, org_id, "documents", base_name)
+                tenant_txt = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, org_id, "documents", f"{clean_stem}.txt")
+                if os.path.isfile(tenant_cand):
+                    found_path = tenant_cand
+                elif os.path.isfile(tenant_txt):
+                    found_path = tenant_txt
+
+        if not found_path:
+            return {"error": f"File '{filepath}' not found in workspace or company documents."}
 
         try:
-            with open(safe_path, "r", encoding="utf-8", errors="replace") as f:
-                content = f.read(100000) # 100KB limit
-            return {"filepath": filepath, "content": content}
+            lower_name = found_path.lower()
+            if lower_name.endswith((".pdf", ".docx", ".xlsx", ".pptx")):
+                from app.services.parsers.factory import parser_factory
+                with open(found_path, "rb") as f_bin:
+                    parse_res = parser_factory.get_parser(found_path).parse(f_bin.read(), os.path.basename(found_path))
+                return {
+                    "filepath": filepath,
+                    "content": parse_res.get("full_text", "")[:100000],
+                    "metadata": parse_res.get("metadata", {})
+                }
+            else:
+                with open(found_path, "r", encoding="utf-8", errors="replace") as f:
+                    content = f.read(100000)
+                return {"filepath": filepath, "content": content}
         except Exception as e:
             return {"error": f"Failed to read file: {str(e)}"}
 

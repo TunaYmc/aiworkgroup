@@ -3,6 +3,7 @@ from app.services.tools.base import BaseTool
 from app.services.tools.filesystem import ListFilesTool, FileReadTool, FileWriteTool, FileSearchTool
 from app.services.tools.python_sandbox import PythonSandboxTool
 from app.services.tools.web_search import WebSearchTool
+from app.services.tools.knowledge import SearchKnowledgeTool, ReadDocumentTool
 
 class ToolRegistry:
     def __init__(self):
@@ -13,6 +14,8 @@ class ToolRegistry:
             FileReadTool(),
             FileWriteTool(),
             FileSearchTool(),
+            SearchKnowledgeTool(),
+            ReadDocumentTool(),
             PythonSandboxTool(),
             WebSearchTool(),
         ]:
@@ -28,9 +31,18 @@ class ToolRegistry:
         """
         Converts tool definitions into OpenAI / OpenRouter function calling schema.
         """
+        effective_allowed = None
+        if allowed_tools is not None:
+            effective_allowed = list(allowed_tools)
+            if "file_read" in allowed_tools or "file_search" in allowed_tools:
+                if "search_knowledge" not in effective_allowed:
+                    effective_allowed.append("search_knowledge")
+                if "read_document" not in effective_allowed:
+                    effective_allowed.append("read_document")
+
         schemas = []
         for name, tool in self._tools.items():
-            if allowed_tools is not None and name not in allowed_tools:
+            if effective_allowed is not None and name not in effective_allowed:
                 continue
             schemas.append({
                 "type": "function",
@@ -58,8 +70,13 @@ class ToolRegistry:
         # Strict Backend Authorization: LLM cannot bypass this
         if tool_name in denied:
             raise PermissionError(f"Tool '{tool_name}' is explicitly denied for this agent.")
-        if allowed is not None and tool_name not in allowed:
-            raise PermissionError(f"Tool '{tool_name}' is not in the allowed tools list for this agent.")
+
+        if allowed is not None:
+            effective_allowed = list(allowed)
+            if "file_read" in allowed or "file_search" in allowed:
+                effective_allowed.extend(["search_knowledge", "read_document"])
+            if tool_name not in effective_allowed:
+                raise PermissionError(f"Tool '{tool_name}' is not in the allowed tools list for this agent.")
 
         tool = self.get_tool(tool_name)
         if not tool:
