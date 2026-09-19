@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     libpq-dev \
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-tur \
+    tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
