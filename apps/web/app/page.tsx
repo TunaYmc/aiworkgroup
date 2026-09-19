@@ -190,7 +190,7 @@ export default function DashboardPage() {
           {
             label: "İşlenen Dökümanlar (RAG)",
             value: "148 Dosya",
-            change: "pgvector indeksli",
+            change: "Sistemde hazır",
             icon: FolderKanban,
             color: "text-indigo-600 bg-indigo-50 border-indigo-100",
           },
