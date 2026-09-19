@@ -161,6 +161,8 @@ services:
       - "8080:8080"
     command: python -m app.runtime.standalone_gateway
     environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/yapayzekacalisan
+      - REDIS_URL=redis://redis:6379/0
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OPENCLAW_PORT=8080
     volumes:

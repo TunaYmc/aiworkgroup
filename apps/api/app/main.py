@@ -48,6 +48,7 @@ async def lifespan(app: FastAPI):
     try:
         from app.core.database import AsyncSessionLocal
         from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
+        from sqlalchemy import select
         import os
         async with AsyncSessionLocal() as session:
             doc_res = await session.execute(select(KnowledgeDocument))
