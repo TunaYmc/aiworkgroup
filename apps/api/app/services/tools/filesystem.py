@@ -152,10 +152,60 @@ class FileWriteTool(BaseTool):
         try:
             with open(safe_path, "w", encoding="utf-8") as f:
                 f.write(content)
+            
+            # Sync generated file to UI (AgentFile) so user can see it
+            from app.core.database import AsyncSessionLocal
+            from app.models.agent import AgentFile
+            from app.services.storage import storage_service
+            from sqlalchemy import select
+            import hashlib
+            import uuid
+            import io
+
+            org_id = context.get("organization_id")
+            agent_id = context.get("agent_id")
+            if org_id:
+                async with AsyncSessionLocal() as db:
+                    content_bytes = content.encode("utf-8")
+                    f_size = len(content_bytes)
+                    checksum = hashlib.sha256(content_bytes).hexdigest()
+                    b_name = os.path.basename(safe_path)
+
+                    stmt = select(AgentFile).where((AgentFile.organization_id == org_id) & (AgentFile.filename == b_name))
+                    res = await db.execute(stmt)
+                    existing = res.scalars().first()
+
+                    if not existing:
+                        new_file = AgentFile(
+                            organization_id=org_id,
+                            agent_id=agent_id,
+                            filename=b_name,
+                            mime_type="text/plain",
+                            size=f_size,
+                            storage_key=f"gen_{uuid.uuid4()}_{b_name}",
+                            checksum=checksum,
+                            status="ready"
+                        )
+                        db.add(new_file)
+                        await db.commit()
+                        try:
+                            storage_service.upload_file(io.BytesIO(content_bytes), new_file.storage_key, "text/plain")
+                        except Exception:
+                            pass
+                    else:
+                        existing.size = f_size
+                        existing.checksum = checksum
+                        await db.commit()
+                        try:
+                            storage_service.upload_file(io.BytesIO(content_bytes), existing.storage_key, "text/plain")
+                        except Exception:
+                            pass
+
             return {
                 "filepath": filepath,
                 "bytes_written": len(content.encode("utf-8")),
-                "status": "success"
+                "status": "success",
+                "ui_visibility": "Dosya kullanıcıya dokümanlar sayfasında görünür hale getirildi."
             }
         except Exception as e:
             return {"error": f"Failed to write file: {str(e)}"}

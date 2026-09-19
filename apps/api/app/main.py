@@ -62,20 +62,8 @@ async def lifespan(app: FastAPI):
                 chunks = c_res.scalars().all()
                 if chunks:
                     doc_text = "\n\n".join(c.content for c in chunks)
-                    clean_stem = os.path.splitext(os.path.basename(doc.title))[0]
-                    txt_name = f"{clean_stem}.txt"
-                    tenant_docs = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, doc.organization_id, "documents")
-                    os.makedirs(tenant_docs, exist_ok=True)
-                    with open(os.path.join(tenant_docs, txt_name), "w", encoding="utf-8") as f_out:
-                        f_out.write(doc_text)
-
-                    agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, doc.organization_id, "agents")
-                    if os.path.exists(agents_dir):
-                        for ag in os.listdir(agents_dir):
-                            ag_docs = os.path.join(agents_dir, ag, "workspace", "documents")
-                            os.makedirs(ag_docs, exist_ok=True)
-                            with open(os.path.join(ag_docs, txt_name), "w", encoding="utf-8") as f_ag:
-                                f_ag.write(doc_text)
+                    # (REMOVED: User requested not to automatically convert to .txt)
+                    pass
         logger.info("Knowledge documents synced to workspace filesystem successfully.")
     except Exception as sync_err:
         logger.warning(f"Document filesystem sync deferred: {sync_err}")
