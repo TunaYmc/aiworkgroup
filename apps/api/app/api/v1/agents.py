@@ -191,16 +191,19 @@ async def stream_agent(
     async def event_generator():
         try:
             while True:
-                event = await queue.get()
-                if event is None:
-                    break
-                yield f"data: {json.dumps(event)}\n\n"
-                if event.get("type") == "done":
-                    break
+                try:
+                    event = await asyncio.wait_for(queue.get(), timeout=10.0)
+                    if event is None:
+                        break
+                    yield f"data: {json.dumps(event)}\n\n"
+                    if event.get("type") == "done":
+                        break
+                except asyncio.TimeoutError:
+                    yield "data: {\"type\": \"ping\"}\n\n"
         except asyncio.CancelledError:
             pass
         finally:
-            agent_manager.unsubscribe(agent_id, queue)
+            agent_manager.unsubscribe(agent_id_val if 'agent_id_val' in locals() else agent_id, queue)
             
     headers = {
         "Cache-Control": "no-cache",
@@ -311,16 +314,19 @@ async def chat_with_agent(
     async def event_generator():
         try:
             while True:
-                event = await queue.get()
-                if event is None:
-                    break
-                yield f"data: {json.dumps(event)}\n\n"
-                if event.get("type") == "done":
-                    break
+                try:
+                    event = await asyncio.wait_for(queue.get(), timeout=10.0)
+                    if event is None:
+                        break
+                    yield f"data: {json.dumps(event)}\n\n"
+                    if event.get("type") == "done":
+                        break
+                except asyncio.TimeoutError:
+                    yield "data: {\"type\": \"ping\"}\n\n"
         except asyncio.CancelledError:
             pass
         finally:
-            agent_manager.unsubscribe(agent_id_val, queue)
+            agent_manager.unsubscribe(agent_id_val if 'agent_id_val' in locals() else agent_id, queue)
             
     headers = {
         "Cache-Control": "no-cache",

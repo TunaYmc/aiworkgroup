@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronUp,
   Settings,
+  Globe,
   RefreshCw,
   FolderOpen,
   LogIn
@@ -229,20 +230,32 @@ export default function AgentWorkspacePage() {
           updateThoughtText(event.content);
         } else if (event.type === "tool_call") {
           const tool = event.tool;
+          if (tool === "file_read") {
+            updateThoughtText("Belge okunuyor ve inceleniyor...");
+          } else if (tool === "python") {
+            updateThoughtText("Python kodu çalıştırılıyor ve veri işleniyor...");
+          } else if (tool === "file_write") {
+            updateThoughtText("Dosya ve rapor diske kaydediliyor...");
+          } else if (tool === "search_knowledge" || tool === "read_document") {
+            updateThoughtText("Kurumsal bilgi havuzunda taranıyor...");
+          } else if (tool === "web_search") {
+            updateThoughtText("Web üzerinde araştırma yapılıyor...");
+          } else if (tool === "browser") {
+            updateThoughtText("Web tarayıcısı üzerinden otonom işlem yapılıyor...");
+          } else {
+            updateThoughtText(`'${tool}' aracı çalıştırılıyor...`);
+          }
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, toolEvent: { tool, status: "running" } }
-                : m
+              m.id === assistantMsgId ? { ...m, toolEvent: { tool, status: "running" } } : m
             )
           );
         } else if (event.type === "tool_result") {
           const tool = event.tool;
+          updateThoughtText(`'${tool}' tamamlandı, sonuçlar değerlendiriliyor...`);
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, toolEvent: { tool, status: "completed", result: "Başarılı" } }
-                : m
+              m.id === assistantMsgId ? { ...m, toolEvent: { tool, status: "completed" } } : m
             )
           );
         } else if (event.type === "assistant_text") {
@@ -405,8 +418,19 @@ export default function AgentWorkspacePage() {
           } else {
             updateThoughtText(`'${tool}' aracı çalıştırılıyor...`);
           }
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId ? { ...m, toolEvent: { tool, status: "running" } } : m
+            )
+          );
         } else if (event.type === "tool_result") {
-          updateThoughtText(`'${event.tool}' tamamlandı, sonuçlar değerlendiriliyor...`);
+          const tool = event.tool;
+          updateThoughtText(`'${tool}' tamamlandı, sonuçlar değerlendiriliyor...`);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId ? { ...m, toolEvent: { tool, status: "completed" } } : m
+            )
+          );
         } else if (event.type === "permission_denied") {
           updateThoughtText(`Güvenlik engeli: ${event.message}`);
         } else if (event.type === "assistant_text") {
@@ -618,6 +642,12 @@ export default function AgentWorkspacePage() {
                       <div className="flex items-center gap-2 text-[11px] font-mono font-medium text-blue-400">
                         <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                         <span>Thinking for {thinkingSeconds.toFixed(1)}s</span>
+                        {msg.toolEvent?.tool === "browser" && (
+                          <div className="ml-2 inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-blue-900/40 border border-blue-700/50 text-[10px] font-mono text-blue-300">
+                            <Globe className="w-3 h-3 animate-pulse" />
+                            <span>Web'de Geziniyor</span>
+                          </div>
+                        )}
                       </div>
                       <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
                         {selectedModel.split("/").pop()}
@@ -667,9 +697,17 @@ export default function AgentWorkspacePage() {
                   }`}
                 >
                   {!isUser && msg.thoughtDuration !== undefined && (
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mb-2 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
-                      <Sparkles className="w-3 h-3 text-blue-400" />
-                      <span>Thinking for {msg.thoughtDuration}s</span>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
+                        <Sparkles className="w-3 h-3 text-blue-400" />
+                        <span>Thinking for {msg.thoughtDuration}s</span>
+                      </div>
+                      {msg.toolEvent?.tool === "browser" && (
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-900/30 border border-blue-800/50 text-[10px] font-mono text-blue-300">
+                          <Globe className="w-3 h-3" />
+                          <span>Tarayıcı kullanıldı</span>
+                        </div>
+                      )}
                     </div>
                   )}
                   <p className="whitespace-pre-wrap">{msg.content}</p>

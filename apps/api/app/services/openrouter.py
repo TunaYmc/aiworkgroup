@@ -247,7 +247,7 @@ class OpenRouterService:
             payload["tools"] = tools
             payload["tool_choice"] = "auto"
 
-        async with httpx.AsyncClient(timeout=90.0) as client:
+        async with httpx.AsyncClient(timeout=600.0) as client:
             resp = await client.post(f"{self.base_url}/chat/completions", headers=headers, json=payload)
             
             # If 400 or 404 with tools, retry without tools (some providers or free models reject tools)
