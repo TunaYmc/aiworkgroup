@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class FileResponse(BaseModel):
@@ -13,6 +13,8 @@ class FileResponse(BaseModel):
     checksum: Optional[str] = None
     status: str
     created_at: datetime
+    path: Optional[str] = None
+    type: str = "file" # "file" or "folder"
 
     class Config:
         from_attributes = True
@@ -20,3 +22,7 @@ class FileResponse(BaseModel):
 class FileUploadResponse(BaseModel):
     file: FileResponse
     message: str
+
+class FolderCreateRequest(BaseModel):
+    path: str
+    folder_name: str

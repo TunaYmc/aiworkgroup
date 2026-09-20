@@ -1,36 +1,118 @@
+import os
+import uuid
 import hashlib
+import mimetypes
+from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+from sqlalchemy import select
 from app.core.database import get_db
 from app.core.deps import get_current_user, get_current_organization
-from app.models.tenant import Organization, User
+from app.models.tenant import Organization
 from app.models.agent import AgentFile
-from app.schemas.file import FileResponse, FileUploadResponse
+from app.schemas.file import FileResponse, FileUploadResponse, FolderCreateRequest
 from app.services.storage import storage_service
 from app.services.ingestion import ingestion_service
+from app.core.config import settings
 
 router = APIRouter(prefix="/files", tags=["Files"])
 
+def get_tenant_docs_dir(org_id: str) -> str:
+    path = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, org_id, "documents")
+    os.makedirs(path, exist_ok=True)
+    return path
+
+def sanitize_path(base_dir: str, requested_path: str) -> str:
+    clean_path = requested_path.strip("/")
+    if ".." in clean_path:
+        raise HTTPException(status_code=400, detail="Invalid path")
+    full_path = os.path.abspath(os.path.join(base_dir, clean_path))
+    if not full_path.startswith(os.path.abspath(base_dir)):
+        raise HTTPException(status_code=400, detail="Access denied")
+    return full_path
+
 @router.get("", response_model=List[FileResponse])
 async def list_files(
-    agent_id: Optional[str] = None,
+    path: str = "",
     current_org: Organization = Depends(get_current_organization),
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(AgentFile).where(AgentFile.organization_id == current_org.id)
-    if agent_id:
-        query = query.where(AgentFile.agent_id == agent_id)
-    query = query.order_by(desc(AgentFile.created_at))
-    result = await db.execute(query)
-    return result.scalars().all()
+    base_dir = get_tenant_docs_dir(current_org.id)
+    target_dir = sanitize_path(base_dir, path)
+    
+    if not os.path.exists(target_dir):
+        return []
+
+    # Fetch all DB records to map IDs if available
+    db_files = await db.execute(select(AgentFile).where(AgentFile.organization_id == current_org.id))
+    db_file_map = {f.filename: f for f in db_files.scalars().all()}
+
+    results = []
+    try:
+        entries = os.listdir(target_dir)
+    except Exception:
+        return []
+
+    for entry in entries:
+        full_entry_path = os.path.join(target_dir, entry)
+        rel_path = os.path.relpath(full_entry_path, base_dir).replace("\\", "/")
+        is_dir = os.path.isdir(full_entry_path)
+        
+        stat = os.stat(full_entry_path)
+        created_at = datetime.fromtimestamp(stat.st_mtime)
+        
+        if is_dir:
+            results.append(FileResponse(
+                id=f"folder_{hashlib.md5(rel_path.encode()).hexdigest()[:12]}",
+                organization_id=current_org.id,
+                filename=entry,
+                mime_type="folder",
+                size=0,
+                storage_key="",
+                status="ready",
+                created_at=created_at,
+                path=rel_path,
+                type="folder"
+            ))
+        else:
+            db_record = db_file_map.get(rel_path) or db_file_map.get(entry)
+            file_id = db_record.id if db_record else f"file_{hashlib.md5(rel_path.encode()).hexdigest()[:12]}"
+            mime = mimetypes.guess_type(entry)[0] or "application/octet-stream"
+            results.append(FileResponse(
+                id=file_id,
+                organization_id=current_org.id,
+                filename=entry,
+                mime_type=mime,
+                size=stat.st_size,
+                storage_key=db_record.storage_key if db_record else "",
+                status="ready",
+                created_at=db_record.created_at if db_record else created_at,
+                path=rel_path,
+                type="file"
+            ))
+
+    # Sort folders first, then files
+    results.sort(key=lambda x: (0 if x.type == 'folder' else 1, x.filename.lower()))
+    return results
+
+@router.post("/folder")
+async def create_folder(
+    req: FolderCreateRequest,
+    current_org: Organization = Depends(get_current_organization)
+):
+    base_dir = get_tenant_docs_dir(current_org.id)
+    target_dir = sanitize_path(base_dir, req.path)
+    new_folder_path = sanitize_path(target_dir, req.folder_name)
+    
+    os.makedirs(new_folder_path, exist_ok=True)
+    return {"status": "success", "path": os.path.relpath(new_folder_path, base_dir).replace("\\", "/")}
 
 @router.post("/upload", response_model=FileUploadResponse)
 async def upload_file(
     file: UploadFile = File(...),
-    agent_id: Optional[str] = Form(None),
+    path: str = Form(""),
     current_org: Organization = Depends(get_current_organization),
     db: AsyncSession = Depends(get_db)
 ):
@@ -38,144 +120,109 @@ async def upload_file(
     file_size = len(content)
     checksum = hashlib.sha256(content).hexdigest()
 
-    # Create DB record
+    base_dir = get_tenant_docs_dir(current_org.id)
+    target_dir = sanitize_path(base_dir, path)
+    os.makedirs(target_dir, exist_ok=True)
+    
+    clean_filename = file.filename or "unnamed_file"
+    dest_path = os.path.join(target_dir, clean_filename)
+    rel_path = os.path.relpath(dest_path, base_dir).replace("\\", "/")
+
+    # Create DB record to keep RAG logic happy
     agent_file = AgentFile(
         organization_id=current_org.id,
-        agent_id=agent_id,
-        filename=file.filename or "unnamed_file",
+        filename=rel_path,  # store relative path in DB
         mime_type=file.content_type or "application/octet-stream",
         size=file_size,
-        storage_key="pending",
+        storage_key="local",
         checksum=checksum,
         status="processing"
     )
     db.add(agent_file)
     await db.flush()
-
-    # Generate key and upload to MinIO/S3
-    storage_key = storage_service.generate_storage_key(
-        organization_id=current_org.id,
-        agent_id=agent_id,
-        file_id=agent_file.id,
-        filename=agent_file.filename
-    )
-    agent_file.storage_key = storage_key
     await db.commit()
 
-    import io
-    import os
-    from app.core.config import settings
+    with open(dest_path, "wb") as f_out:
+        f_out.write(content)
 
-    # 1. Upload to S3/MinIO
+    # Ingest document text for RAG
     try:
-        storage_service.upload_file(io.BytesIO(content), storage_key, agent_file.mime_type)
-    except Exception as s3_err:
-        pass
-
-    # 2. Save file to tenant documents directory for filesystem tool access
-    clean_filename = os.path.basename(agent_file.filename)
-    tenant_docs_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, current_org.id, "documents")
-    os.makedirs(tenant_docs_dir, exist_ok=True)
-    dest_path = os.path.join(tenant_docs_dir, clean_filename)
-    try:
-        with open(dest_path, "wb") as f_out:
-            f_out.write(content)
+        await ingestion_service.ingest_file(db, agent_file, content)
     except Exception:
         pass
 
-    # 3. Mirror file into agent workspaces
-    agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, current_org.id, "agents")
-    if os.path.exists(agents_dir):
-        for ag_dir in os.listdir(agents_dir):
-            ag_ws_docs = os.path.join(agents_dir, ag_dir, "workspace", "documents")
-            os.makedirs(ag_ws_docs, exist_ok=True)
-            try:
-                with open(os.path.join(ag_ws_docs, clean_filename), "wb") as f_ag:
-                    f_ag.write(content)
-            except Exception:
-                pass
-
-    # Ingest document text for RAG
-    await ingestion_service.ingest_file(db, agent_file, content)
-
+    resp = FileResponse.model_validate(agent_file)
+    resp.path = rel_path
+    resp.type = "file"
+    
     return FileUploadResponse(
-        file=FileResponse.model_validate(agent_file),
-        message="Dosya başarıyla yüklendi ve işleme alındı."
+        file=resp,
+        message="Dosya başarıyla yüklendi."
     )
 
 @router.get("/{file_id}/download")
 async def download_file(
     file_id: str,
+    path: str = "",
     current_org: Organization = Depends(get_current_organization),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(AgentFile).where((AgentFile.id == file_id) & (AgentFile.organization_id == current_org.id))
-    )
-    agent_file = result.scalars().first()
-    if not agent_file:
+    # Support downloading by path directly if id starts with 'file_'
+    base_dir = get_tenant_docs_dir(current_org.id)
+    
+    if path:
+        target_path = sanitize_path(base_dir, path)
+    else:
+        # Fallback to DB lookup
+        result = await db.execute(
+            select(AgentFile).where((AgentFile.id == file_id) & (AgentFile.organization_id == current_org.id))
+        )
+        agent_file = result.scalars().first()
+        if not agent_file:
+            raise HTTPException(status_code=404, detail="Dosya bulunamadı")
+        target_path = sanitize_path(base_dir, agent_file.filename)
+
+    if not os.path.exists(target_path) or os.path.isdir(target_path):
         raise HTTPException(status_code=404, detail="Dosya bulunamadı")
 
-    file_bytes = storage_service.download_file(agent_file.storage_key)
-    if not file_bytes:
-        import os
-        from app.core.config import settings
+    with open(target_path, "rb") as f:
+        file_bytes = f.read()
 
-        cand_paths = [
-            os.path.join(settings.DEFAULT_WORKSPACE_ROOT, agent_file.organization_id, "documents", agent_file.filename),
-        ]
-        agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, agent_file.organization_id, "agents")
-        if os.path.exists(agents_dir):
-            for ag in os.listdir(agents_dir):
-                cand_paths.append(os.path.join(agents_dir, ag, "workspace", agent_file.filename))
-                cand_paths.append(os.path.join(agents_dir, ag, "workspace", "documents", agent_file.filename))
-
-        for cand in cand_paths:
-            if os.path.isfile(cand):
-                try:
-                    with open(cand, "rb") as f_cand:
-                        file_bytes = f_cand.read()
-                    # Backfill to storage_service
-                    try:
-                        import io
-                        storage_service.upload_file(
-                            io.BytesIO(file_bytes),
-                            agent_file.storage_key,
-                            agent_file.mime_type or "application/octet-stream"
-                        )
-                    except Exception:
-                        pass
-                    break
-                except Exception:
-                    pass
-
-    if not file_bytes:
-        file_bytes = b"File content placeholder in development mode"
-
-    import mimetypes
-    guessed_type = mimetypes.guess_type(agent_file.filename)[0]
-    media_type = guessed_type or agent_file.mime_type or "application/octet-stream"
+    filename = os.path.basename(target_path)
+    guessed_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
 
     return Response(
         content=file_bytes,
-        media_type=media_type,
-        headers={"Content-Disposition": f'inline; filename="{agent_file.filename}"'}
+        media_type=guessed_type,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'}
     )
 
 @router.delete("/{file_id}")
 async def delete_file(
     file_id: str,
+    path: str = "",
     current_org: Organization = Depends(get_current_organization),
     db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(
-        select(AgentFile).where((AgentFile.id == file_id) & (AgentFile.organization_id == current_org.id))
-    )
-    agent_file = result.scalars().first()
-    if not agent_file:
-        raise HTTPException(status_code=404, detail="Dosya bulunamadı")
+    base_dir = get_tenant_docs_dir(current_org.id)
+    
+    if path:
+        target_path = sanitize_path(base_dir, path)
+    else:
+        result = await db.execute(select(AgentFile).where((AgentFile.id == file_id) & (AgentFile.organization_id == current_org.id)))
+        agent_file = result.scalars().first()
+        if agent_file:
+            target_path = sanitize_path(base_dir, agent_file.filename)
+            await db.delete(agent_file)
+            await db.commit()
+        else:
+            raise HTTPException(status_code=404, detail="Dosya bulunamadı")
 
-    storage_service.delete_file(agent_file.storage_key)
-    await db.delete(agent_file)
-    await db.commit()
-    return {"message": "Dosya başarıyla silindi"}
+    if os.path.exists(target_path):
+        if os.path.isdir(target_path):
+            import shutil
+            shutil.rmtree(target_path)
+        else:
+            os.remove(target_path)
+            
+    return {"message": "Başarıyla silindi"}
