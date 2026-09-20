@@ -14,6 +14,8 @@ from app.schemas.agent import (
     AgentMessageCreate, AgentMessageResponse
 )
 from app.services.context_builder import ContextBuilder
+from app.services.agent_manager import agent_manager
+import asyncio
 from app.runtime.openclaw import OpenClawRuntimeAdapter
 from app.services.openrouter import OpenRouterService
 from app.services.audit import AuditService
@@ -170,6 +172,44 @@ async def get_agent_messages(
     result = await db.execute(query)
     return result.scalars().all()
 
+
+@router.get("/{agent_id}/stream")
+async def stream_agent(
+    agent_id: str,
+    current_org: Organization = Depends(get_current_organization),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not agent_manager.is_running(agent_id):
+        # Return empty stream that immediately closes if not running
+        async def empty_stream():
+            yield "data: {\"type\": \"ping\"}\n\n"
+        return StreamingResponse(empty_stream(), media_type="text/event-stream")
+
+    queue = agent_manager.subscribe(agent_id)
+    
+    async def event_generator():
+        try:
+            while True:
+                event = await queue.get()
+                if event is None:
+                    break
+                yield f"data: {json.dumps(event)}\n\n"
+                if event.get("type") == "done":
+                    break
+        except asyncio.CancelledError:
+            pass
+        finally:
+            agent_manager.unsubscribe(agent_id, queue)
+            
+    headers = {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Content-Type": "text/event-stream",
+        "X-Accel-Buffering": "no",
+    }
+    return StreamingResponse(event_generator(), media_type="text/event-stream", headers=headers)
+
 @router.post("/{agent_id}/chat")
 async def chat_with_agent(
     agent_id: str,
@@ -191,7 +231,7 @@ async def chat_with_agent(
     if not agent:
         raise HTTPException(status_code=404, detail="Agent bulunamadı")
 
-    # 1. Save user message to database
+    # Save user message
     user_msg = AgentMessage(
         organization_id=current_org.id,
         agent_id=agent.id,
@@ -201,7 +241,6 @@ async def chat_with_agent(
     db.add(user_msg)
     await db.commit()
 
-    # 2. Persist chosen model if provided
     if message_in.model:
         current_config = dict(agent.model_config_data or {})
         if current_config.get("primary_model") != message_in.model:
@@ -209,39 +248,43 @@ async def chat_with_agent(
             agent.model_config_data = current_config
             await db.commit()
 
-    # 3. Build context
     context_builder = ContextBuilder(db)
     built_context = await context_builder.build_context(agent, current_task_prompt=message_in.content)
     if message_in.model:
         built_context["model"] = message_in.model
-
-    async def event_generator():
+        
+    # If already running, wait/reject? For now just cancel old or ignore.
+    # Let's assume we just start a new task
+    
+    org_id_val = current_org.id
+    agent_id_val = agent.id
+    
+    async def background_agent_task(prompt, context):
         runtime = OpenClawRuntimeAdapter()
         full_assistant_reply = ""
-        
         try:
-            async for event in runtime.stream(agent.id, task_id="chat-turn", prompt=message_in.content, context=built_context):
+            async for event in runtime.stream(agent_id_val, task_id="chat-turn", prompt=prompt, context=context):
                 if event.get("type") == "assistant_text" and event.get("content"):
                     full_assistant_reply += event.get("content", "")
-                yield f"data: {json.dumps(event)}\n\n"
+                await agent_manager.broadcast(agent_id_val, event)
         except Exception as ex:
             logger.exception(f"Error in chat stream: {ex}")
             err_text = f"⚠️ Ajan çalıştırılırken bir sorun oluştu: {str(ex)}"
             full_assistant_reply = err_text
-            yield f"data: {json.dumps({'type': 'assistant_text', 'content': err_text})}\n\n"
-
+            await agent_manager.broadcast(agent_id_val, {"type": "assistant_text", "content": err_text})
+            
         if not full_assistant_reply.strip():
-            fallback_text = f"Merhaba! '{message_in.content}' talebiniz başarıyla alındı ve ajanın çalışma hafızasına kaydedildi."
+            fallback_text = f"Merhaba! '{prompt}' talebiniz başarıyla alındı ve ajanın çalışma hafızasına kaydedildi."
             full_assistant_reply = fallback_text
-            yield f"data: {json.dumps({'type': 'assistant_text', 'content': fallback_text})}\n\n"
+            await agent_manager.broadcast(agent_id_val, {"type": "assistant_text", "content": fallback_text})
 
-        # Save assistant message to database asynchronously
+        # Persist
         try:
             from app.core.database import AsyncSessionLocal
             async with AsyncSessionLocal() as session:
                 assistant_msg = AgentMessage(
-                    organization_id=current_org.id,
-                    agent_id=agent.id,
+                    organization_id=org_id_val,
+                    agent_id=agent_id_val,
                     role="assistant",
                     content=full_assistant_reply
                 )
@@ -250,8 +293,35 @@ async def chat_with_agent(
         except Exception as db_err:
             logger.warning(f"Failed to persist assistant message: {db_err}")
 
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        await agent_manager.broadcast(agent_id_val, {"type": "done"})
+        
+        # Cleanup queues
+        for q in agent_manager.subscribers.get(agent_id_val, []):
+            await q.put(None)
+        agent_manager.subscribers[agent_id_val] = []
+        if agent_id_val in agent_manager.running_tasks:
+            del agent_manager.running_tasks[agent_id_val]
 
+    # Start the task
+    task = asyncio.create_task(background_agent_task(message_in.content, built_context))
+    agent_manager.running_tasks[agent_id_val] = task
+    
+    # We must also return a stream for the current request!
+    queue = agent_manager.subscribe(agent_id_val)
+    async def event_generator():
+        try:
+            while True:
+                event = await queue.get()
+                if event is None:
+                    break
+                yield f"data: {json.dumps(event)}\n\n"
+                if event.get("type") == "done":
+                    break
+        except asyncio.CancelledError:
+            pass
+        finally:
+            agent_manager.unsubscribe(agent_id_val, queue)
+            
     headers = {
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
