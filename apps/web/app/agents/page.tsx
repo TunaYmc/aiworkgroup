@@ -104,7 +104,7 @@ export default function AgentsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="İsim veya uzmanlık alanına göre filtrele..."
-            className="w-full pl-8 pr-3 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded-md text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors duration-75"
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-zinc-950 border border-zinc-800 rounded-md text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors duration-75 h-8"
           />
         </div>
 
@@ -113,7 +113,7 @@ export default function AgentsPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-2.5 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded-md text-zinc-300 focus:outline-none focus:border-blue-500 w-full sm:w-auto font-mono"
+            className="px-2.5 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded-md text-zinc-300 focus:outline-none focus:border-blue-500 w-full sm:w-auto font-mono h-8"
           >
             <option value="all">Tüm Roller</option>
             <option value="Sales Employee">Satış & Müşteri</option>
@@ -126,10 +126,15 @@ export default function AgentsPage() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
         {filteredAgents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} />
         ))}
+        {filteredAgents.length === 0 && (
+          <div className="col-span-full py-12 text-center text-xs text-zinc-500 font-mono bg-zinc-900/50 rounded-lg border border-zinc-800/80">
+            Arama kriterlerine uygun ajan servisi bulunamadı.
+          </div>
+        )}
       </div>
 
       <CreateAgentModal

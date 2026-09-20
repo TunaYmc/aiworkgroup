@@ -213,7 +213,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-zinc-100">Ajan Servisleri</h2>
-            <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60 px-1.5 py-0.2 rounded">
+            <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60 px-1.5 py-0.5 rounded leading-none">
               {agents.length} Servis
             </span>
           </div>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
           {agents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} />
           ))}

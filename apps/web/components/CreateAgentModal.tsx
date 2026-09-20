@@ -238,11 +238,11 @@ export default function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateA
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-xs text-zinc-100">{m.name}</span>
-                        <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-1.5 py-0.2 rounded border border-zinc-700/50">
+                        <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-700/50 leading-none">
                           {m.provider}
                         </span>
                         {m.tag && (
-                          <span className="text-[10px] font-mono bg-zinc-800/80 text-blue-400 px-1.5 py-0.2 rounded border border-blue-500/30">
+                          <span className="text-[10px] font-mono bg-zinc-800/80 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 leading-none">
                             {m.tag}
                           </span>
                         )}
