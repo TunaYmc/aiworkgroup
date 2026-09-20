@@ -33,12 +33,8 @@
         reverse_proxy web:3000
     }
 
-    # Global gzip & security headers (SSE streams excluded from compression)
-    encode gzip zstd {
-        match {
-            not header Content-Type *text/event-stream*
-        }
-    }
+    # Global gzip & security headers
+    encode gzip zstd
     header {
         X-Content-Type-Options nosniff
         X-XSS-Protection "1; mode=block"
