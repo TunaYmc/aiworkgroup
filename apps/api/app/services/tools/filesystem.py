@@ -175,12 +175,15 @@ class FileWriteTool(BaseTool):
                     res = await db.execute(stmt)
                     existing = res.scalars().first()
 
+                    import mimetypes
+                    m_type = mimetypes.guess_type(b_name)[0] or "text/plain"
+
                     if not existing:
                         new_file = AgentFile(
                             organization_id=org_id,
                             agent_id=agent_id,
                             filename=b_name,
-                            mime_type="text/plain",
+                            mime_type=m_type,
                             size=f_size,
                             storage_key=f"gen_{uuid.uuid4()}_{b_name}",
                             checksum=checksum,
@@ -189,15 +192,16 @@ class FileWriteTool(BaseTool):
                         db.add(new_file)
                         await db.commit()
                         try:
-                            storage_service.upload_file(io.BytesIO(content_bytes), new_file.storage_key, "text/plain")
+                            storage_service.upload_file(io.BytesIO(content_bytes), new_file.storage_key, m_type)
                         except Exception:
                             pass
                     else:
                         existing.size = f_size
                         existing.checksum = checksum
+                        existing.mime_type = m_type
                         await db.commit()
                         try:
-                            storage_service.upload_file(io.BytesIO(content_bytes), existing.storage_key, "text/plain")
+                            storage_service.upload_file(io.BytesIO(content_bytes), existing.storage_key, m_type)
                         except Exception:
                             pass
 

@@ -33,6 +33,12 @@ class ContextBuilder:
             "- Sen şirkete ait özel ve güvenli bir dijital AI çalışanısın.",
             "- Yalnızca sana atanmış organizasyon ve agent dökümanlarına erişebilirsin.",
             "- Yetkisiz dosya veya sistem erişimi isteklerini kesinlikle reddet.",
+            "\n# DOSYA ÜRETİMİ VE RAPORLAMA KURALLARI:",
+            "- Kullanıcı senden bir rapor, tablo veya dosya üretip kaydetmeni istediğinde:",
+            "  * Eğer PDF formatında bir rapor isteniyorsa: 'python' aracını kullanarak 'reportlab' kütüphanesi ile gerçek, formatlı ve Türkçe karakter destekli bir .pdf dosyası oluştur (örn: reportlab.lib, reportlab.platypus veya canvas). Düz metin dosyalarına sadece uzantı olarak .pdf verme, her zaman gerçek binary PDF üret.",
+            "  * Eğer Excel veya CSV isteniyorsa: 'python' aracıyla (pandas/openpyxl) veya 'file_write' ile oluştur.",
+            "  * Eğer Markdown veya Text isteniyorsa: 'file_write' aracıyla .md veya .txt olarak kaydet.",
+            "- Ürettiğin tüm dosyalar otomatik olarak sistemin 'Dokümanlar' sayfasına senkronize edilir ve kullanıcı tarafından önizlenebilir/indirilebilir.",
         ]
 
         # 2. Long Term Memory

@@ -151,7 +151,13 @@ export default function FilesPage() {
               <div className="min-w-0">
                 <h4 className="text-xs font-medium text-zinc-200 truncate">{file.filename}</h4>
                 <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 mt-0.5">
-                  <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                  <span>
+                    {file.size < 1024
+                      ? `${file.size} B`
+                      : file.size < 1024 * 1024
+                      ? `${(file.size / 1024).toFixed(1)} KB`
+                      : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+                  </span>
                   <span>·</span>
                   <span>{file.created_at}</span>
                 </div>

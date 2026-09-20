@@ -118,13 +118,48 @@ async def download_file(
 
     file_bytes = storage_service.download_file(agent_file.storage_key)
     if not file_bytes:
-        # Fallback for dev if storage not populated
+        import os
+        from app.core.config import settings
+
+        cand_paths = [
+            os.path.join(settings.DEFAULT_WORKSPACE_ROOT, agent_file.organization_id, "documents", agent_file.filename),
+        ]
+        agents_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, agent_file.organization_id, "agents")
+        if os.path.exists(agents_dir):
+            for ag in os.listdir(agents_dir):
+                cand_paths.append(os.path.join(agents_dir, ag, "workspace", agent_file.filename))
+                cand_paths.append(os.path.join(agents_dir, ag, "workspace", "documents", agent_file.filename))
+
+        for cand in cand_paths:
+            if os.path.isfile(cand):
+                try:
+                    with open(cand, "rb") as f_cand:
+                        file_bytes = f_cand.read()
+                    # Backfill to storage_service
+                    try:
+                        import io
+                        storage_service.upload_file(
+                            io.BytesIO(file_bytes),
+                            agent_file.storage_key,
+                            agent_file.mime_type or "application/octet-stream"
+                        )
+                    except Exception:
+                        pass
+                    break
+                except Exception:
+                    pass
+
+    if not file_bytes:
         file_bytes = b"File content placeholder in development mode"
+
+    import mimetypes
+    guessed_type = mimetypes.guess_type(agent_file.filename)[0]
+    media_type = guessed_type or agent_file.mime_type or "application/octet-stream"
 
     return Response(
         content=file_bytes,
-        media_type=agent_file.mime_type,
-        headers={"Content-Disposition": f'attachment; filename="{agent_file.filename}"'}
+        media_type=media_type,
+        headers={"Content-Disposition": f'inline; filename="{agent_file.filename}"'}
     )
 
 @router.delete("/{file_id}")
