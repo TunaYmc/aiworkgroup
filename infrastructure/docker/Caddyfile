@@ -1,7 +1,14 @@
 :80 {
     # API endpoints routed to FastAPI backend
     handle /api/* {
-        reverse_proxy api:8000
+        reverse_proxy api:8000 {
+            flush_interval -1
+            transport http {
+                response_header_timeout 600s
+                read_timeout 600s
+                write_timeout 600s
+            }
+        }
     }
 
     # Health & metrics endpoints
@@ -26,8 +33,12 @@
         reverse_proxy web:3000
     }
 
-    # Global gzip & security headers
-    encode gzip zstd
+    # Global gzip & security headers (SSE streams excluded from compression)
+    encode gzip zstd {
+        match {
+            not header Content-Type *text/event-stream*
+        }
+    }
     header {
         X-Content-Type-Options nosniff
         X-XSS-Protection "1; mode=block"

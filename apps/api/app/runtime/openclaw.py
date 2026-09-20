@@ -110,7 +110,7 @@ class OpenClawRuntimeAdapter(AgentRuntime):
         if gateway_connected and session_id:
             has_emitted_text = False
             try:
-                async with httpx.AsyncClient(timeout=300.0) as client:
+                async with httpx.AsyncClient(timeout=600.0) as client:
                     async with client.stream("GET", f"{self.gateway_url}/v1/sessions/{session_id}/stream") as response:
                         async for line in response.aiter_lines():
                             if line.startswith("data: "):
@@ -121,9 +121,7 @@ class OpenClawRuntimeAdapter(AgentRuntime):
                                         has_emitted_text = True
                                     yield event
                                     if event.get("type") == "done":
-                                        if has_emitted_text:
-                                            return
-                                        break
+                                        return
                                 except json.JSONDecodeError:
                                     continue
             except Exception as stream_err:

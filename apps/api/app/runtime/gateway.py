@@ -122,7 +122,7 @@ async def stream_session(session_id: str):
     async def event_generator():
         while True:
             try:
-                event = await asyncio.wait_for(queue.get(), timeout=60.0)
+                event = await asyncio.wait_for(queue.get(), timeout=15.0)
                 yield f"data: {json.dumps(event)}\n\n"
                 if event.get("type") == "done":
                     break

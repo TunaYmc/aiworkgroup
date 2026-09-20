@@ -44,6 +44,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-secret-key-change-in-production-12345}
       - OPENCLAW_GATEWAY_URL=http://openclaw:8080
       - ENVIRONMENT=development
+      - AGENT_DEBUG_MODE=${AGENT_DEBUG_MODE:-true}
     depends_on:
       postgres:
         condition: service_healthy
@@ -169,6 +170,7 @@ services:
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
       - S3_BUCKET_NAME=yapayzekacalisan
+      - AGENT_DEBUG_MODE=${AGENT_DEBUG_MODE:-true}
     volumes:
       - ./apps/api:/app
       - /data/tenants:/data/tenants

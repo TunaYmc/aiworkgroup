@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # Agent Runtime
     OPENCLAW_GATEWAY_URL: str = "http://localhost:8080"
     DEFAULT_WORKSPACE_ROOT: str = "/data/tenants"
+    AGENT_DEBUG_MODE: bool = True
+    BROWSER_MAX_STEPS: int = 20
 
     # Security
     JWT_SECRET: str = "super-secret-jwt-signing-key-replace-in-prod-minimum-32-chars"
