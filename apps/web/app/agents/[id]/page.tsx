@@ -252,7 +252,6 @@ export default function AgentWorkspacePage() {
         // parse chunk...
         // ... handled in the real code via string manipulation. Let me implement properly here:
         const lines = chunk.split("\n");
-");
         for (const line of lines) {
            if (line.startsWith("data: ")) {
               const dataStr = line.substring(6).trim();
