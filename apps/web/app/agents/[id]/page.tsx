@@ -361,7 +361,6 @@ export default function AgentWorkspacePage() {
       stopThinking(assistantMsgId);
       setActiveAssistantMsgId(null);
     }
-    }
   };
 
 
