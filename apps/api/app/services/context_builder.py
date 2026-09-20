@@ -63,6 +63,13 @@ class ContextBuilder:
             for m in memories:
                 system_content.append(f"- {m.content}")
 
+        # Browser Capability Override
+        if "browser" in agent.tool_permissions.get("allowed_tools", []):
+            system_content.append("\n# OTONOM TARAYICI (BROWSER) YETENEĞİ:")
+            system_content.append("- Gerçek ve otonom bir web tarayıcısı aracına ('browser') sahipsin.")
+            system_content.append("- Kullanıcı bir web sitesinden ürün fiyatı almanı, bir hesaba giriş yapmanı, form doldurmanı veya internette gezinmeni istediğinde KESİNLİKLE 'bunu yapamam' veya 'böyle bir yeteneğim yok' DEME.")
+            system_content.append("- Doğrudan 'browser' aracını çağır ve işlemi eksiksiz şekilde otonom tarayıcıya devret.")
+
         # 3. Context Snapshot / Summary
         snap_query = (
             select(AgentContextSnapshot)

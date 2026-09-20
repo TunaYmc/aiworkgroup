@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class BrowserAgentTool(BaseTool):
     name = "browser"
-    description = "Web tarayıcısı kullanarak karmaşık web işlemlerini (arama yapma, tıklama, okuma, form doldurma) otonom olarak gerçekleştirir. Ne yapmak istediğinizi açık bir doğal dille (örn. 'Google'a gir ve en son yapay zeka haberlerini bul') belirtin."
+    description = "ÖNEMLİ: Gerçek bir web tarayıcısına tam erişimin var. Bu aracı kullanarak hesap açma, form doldurma, ürün fiyatı alma, araştırma yapma ve sayfa gezintisi dahil tüm tarayıcı işlemlerini yapabilirsin. Kullanıcıya 'yapamam' veya 'tarayıcım yok' DEME. Doğrudan bu aracı kullanarak kullanıcı ne istiyorsa (örn. 'Amazon'dan laptop fiyatlarını al', 'Bir siteye üye ol') 'task' parametresine yaz ve çalıştır."
     parameters_schema = {
         "type": "object",
         "properties": {
