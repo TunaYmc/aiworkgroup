@@ -256,6 +256,8 @@ export default function AgentWorkspacePage() {
             updateThoughtText("Kurumsal bilgi havuzunda taranıyor...");
           } else if (tool === "web_search") {
             updateThoughtText("Web üzerinde araştırma yapılıyor...");
+          } else if (tool === "browser") {
+            updateThoughtText("Web tarayıcısı üzerinden otonom işlem yapılıyor...");
           } else {
             updateThoughtText(`'${tool}' aracı çalıştırılıyor...`);
           }

@@ -54,7 +54,7 @@ async def create_agent(
             "max_tokens": 4096
         },
         tool_permissions=agent_in.tool_permissions or {
-            "allowed_tools": ["file_search", "file_read", "file_write", "list_files", "python", "web_search"],
+            "allowed_tools": ["file_search", "file_read", "file_write", "list_files", "python", "web_search", "browser"],
             "denied_tools": ["arbitrary_host_exec"]
         }
     )

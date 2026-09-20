@@ -4,6 +4,7 @@ from app.services.tools.filesystem import ListFilesTool, FileReadTool, FileWrite
 from app.services.tools.python_sandbox import PythonSandboxTool
 from app.services.tools.web_search import WebSearchTool
 from app.services.tools.knowledge import SearchKnowledgeTool, ReadDocumentTool
+from app.services.tools.browser import BrowserAgentTool
 
 class ToolRegistry:
     def __init__(self):
@@ -18,6 +19,7 @@ class ToolRegistry:
             ReadDocumentTool(),
             PythonSandboxTool(),
             WebSearchTool(),
+            BrowserAgentTool(),
         ]:
             self._tools[tool.name] = tool
 
