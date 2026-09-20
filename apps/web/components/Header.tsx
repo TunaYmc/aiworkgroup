@@ -79,7 +79,7 @@ export default function Header() {
           <div className="flex items-center gap-2 pl-2 border-l border-zinc-800">
             <Link
               href="/login"
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75"
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Giriş Yap</span>

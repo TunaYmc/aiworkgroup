@@ -122,7 +122,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-subtle"
+            className="w-full py-2 bg-blue-600 hover:bg-blue-500 hover-glow disabled:opacity-50 text-white rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-subtle"
           >
             <span>{loading ? "Giriş Yapılıyor..." : "Giriş Yap"}</span>
             <ArrowRight className="w-3.5 h-3.5" />

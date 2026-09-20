@@ -125,7 +125,7 @@ export default function FilesPage() {
         </div>
 
         {/* Upload Button */}
-        <label className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer shrink-0">
+        <label className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer shrink-0">
           <UploadCloud className="w-3.5 h-3.5" />
           <span>{uploading ? "İşleniyor..." : "Döküman Yükle"}</span>
           <input
@@ -163,7 +163,7 @@ export default function FilesPage() {
         ) : (
           <>
             {filteredFiles.map((file) => (
-              <div key={file.id} className="p-3.5 flex items-center justify-between gap-4 hover:bg-zinc-800/40 transition-colors duration-75">
+              <div key={file.id} className="p-3.5 flex items-center justify-between gap-4 hover-row">
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded bg-zinc-800 border border-zinc-700/60 text-zinc-400 flex items-center justify-center shrink-0">
                     <FileText className="w-3.5 h-3.5" />

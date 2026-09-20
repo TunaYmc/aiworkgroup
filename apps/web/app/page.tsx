@@ -138,7 +138,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/login"
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shrink-0"
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded-md text-xs font-medium transition-colors duration-75 shrink-0"
           >
             Giriş Yap →
           </Link>
@@ -164,7 +164,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Yeni Ajan Servisi</span>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
           ].map((metric, i) => (
             <div
               key={i}
-              className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 shadow-subtle flex flex-col justify-between"
+              className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 shadow-subtle flex flex-col justify-between hover-lift"
             >
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">{metric.label}</span>

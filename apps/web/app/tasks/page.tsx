@@ -114,7 +114,7 @@ export default function TasksPage() {
               const isDone = task.status === "completed";
               const isRunning = task.status === "running";
               return (
-                <div key={task.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-zinc-800/30 transition-colors duration-75">
+                <div key={task.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover-row">
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span

@@ -68,7 +68,7 @@ export default function SettingsPage() {
           </span>
           <button
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded-md text-xs font-medium transition-colors duration-75 cursor-pointer shrink-0"
           >
             <Save className="w-3.5 h-3.5" />
             <span>{saved ? "Kaydedildi" : "Kaydet"}</span>

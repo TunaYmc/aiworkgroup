@@ -161,7 +161,7 @@ export default function ModelsPage() {
           models.map((model) => (
             <div
               key={model.id}
-              className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 shadow-subtle flex flex-col justify-between hover:border-zinc-700 transition-colors duration-75"
+              className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 shadow-subtle flex flex-col justify-between hover-lift"
             >
               <div>
                 {/* Card Title & Provider */}

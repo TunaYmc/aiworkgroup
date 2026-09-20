@@ -314,7 +314,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateA
             <button
               onClick={() => setStep(step + 1)}
               disabled={step === 1 && !name.trim()}
-              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75"
+              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 hover-glow disabled:opacity-50 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75"
             >
               <span>İleri</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -323,7 +323,7 @@ export default function CreateAgentModal({ isOpen, onClose, onSuccess }: CreateA
             <button
               onClick={handleCreate}
               disabled={loading}
-              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75"
             >
               {loading ? "Oluşturuluyor..." : "Ajan Servisini Başlat"}
             </button>

@@ -530,7 +530,7 @@ export default function AgentWorkspacePage() {
               <button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium shrink-0 transition-colors duration-75 flex items-center gap-1 cursor-pointer"
+                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 hover-glow text-white rounded text-xs font-medium shrink-0 transition-colors duration-75 flex items-center gap-1 cursor-pointer"
               >
                 <span>Giriş Yap</span>
               </button>
@@ -643,7 +643,7 @@ export default function AgentWorkspacePage() {
             <button
               type="submit"
               disabled={!input.trim() || isStreaming}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75 cursor-pointer"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 hover-glow disabled:opacity-40 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75 cursor-pointer"
             >
               <Send className="w-3 h-3" />
               <span>Gönder</span>

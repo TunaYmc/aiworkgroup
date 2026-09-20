@@ -13,7 +13,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
   const isOnline = agent.status === "active";
 
   return (
-    <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 hover:border-zinc-700 transition-colors duration-75 flex flex-col justify-between h-full shadow-subtle group">
+    <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 hover-lift flex flex-col justify-between h-full shadow-subtle group">
       <div>
         {/* Top bar: Avatar, Info & Status */}
         <div className="flex items-start justify-between gap-2.5 mb-3">
@@ -67,7 +67,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
       <div className="pt-3 border-t border-zinc-800/80 mt-auto">
         <Link
           href={`/agents/${agent.id}`}
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-zinc-800/80 hover:bg-blue-600 hover:text-white text-zinc-300 rounded-md text-xs font-medium transition-colors duration-75 border border-zinc-700/60 hover:border-blue-500"
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-zinc-800/80 hover:bg-blue-600 hover:text-white hover-glow text-zinc-300 rounded-md text-xs font-medium transition-colors duration-75 border border-zinc-700/60 hover:border-blue-500"
         >
           <span>Workspace</span>
           <ArrowRight className="w-3 h-3" />

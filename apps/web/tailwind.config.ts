@@ -38,6 +38,13 @@ const config: Config = {
         subtle: "0 1px 2px 0 rgba(0, 0, 0, 0.4)",
         card: "0 1px 3px 0 rgba(0, 0, 0, 0.5)",
       },
+      borderRadius: {
+        'sm': '6px',
+        DEFAULT: '8px',
+        'md': '10px',
+        'lg': '14px',
+        'xl': '18px',
+      },
       spacing: {
         "4.5": "1.125rem",
       }
