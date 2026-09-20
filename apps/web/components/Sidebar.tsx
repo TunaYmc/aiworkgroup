@@ -82,16 +82,6 @@ export default function Sidebar() {
           })}
         </div>
 
-        {/* Isolation Status Indicator */}
-        <div className="p-3 m-2 rounded-lg border border-zinc-800/80 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden shrink-0">
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-            <span>Tenant İzolasyonu</span>
-          </div>
-          <p className="text-[11px] text-zinc-500 mt-1 leading-normal truncate">
-            PostgreSQL RLS & Sandbox aktif
-          </p>
-        </div>
       </aside>
     </div>
   );
