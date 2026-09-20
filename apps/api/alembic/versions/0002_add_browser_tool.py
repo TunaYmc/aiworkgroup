@@ -23,8 +23,8 @@ def upgrade() -> None:
             tool_permissions::jsonb, 
             '{allowed_tools}', 
             (tool_permissions->'allowed_tools')::jsonb || '["browser"]'::jsonb
-        ) 
-        WHERE tool_permissions ? 'allowed_tools'
+        )::json 
+        WHERE tool_permissions::jsonb ? 'allowed_tools'
         AND NOT (tool_permissions->'allowed_tools')::jsonb ? 'browser';
     """)
 
@@ -40,7 +40,7 @@ def downgrade() -> None:
                 FROM jsonb_array_elements(tool_permissions->'allowed_tools') elem 
                 WHERE elem::text != '"browser"'
             )
-        ) 
-        WHERE tool_permissions ? 'allowed_tools'
+        )::json 
+        WHERE tool_permissions::jsonb ? 'allowed_tools'
         AND (tool_permissions->'allowed_tools')::jsonb ? 'browser';
     """)
