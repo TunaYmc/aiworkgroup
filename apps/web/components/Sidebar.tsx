@@ -41,9 +41,6 @@ export default function Sidebar() {
             <span className="font-semibold text-zinc-100 text-sm tracking-tight truncate">
               YapayZeka<span className="text-blue-500">Platform</span>
             </span>
-            <span className="text-[10px] text-zinc-500 font-mono tracking-wide">
-              Enterprise · v2.4
-            </span>
           </div>
         </div>
 
