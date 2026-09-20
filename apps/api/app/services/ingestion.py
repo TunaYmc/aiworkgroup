@@ -62,7 +62,7 @@ class DocumentIngestionService:
             embeddings = await embedding_service.get_embeddings(chunks)
 
             # 4. Remove existing KnowledgeDocument/Chunks if re-ingesting
-            from sqlalchemy import delete
+            from sqlalchemy import delete, select
             old_docs_res = await db.execute(select(KnowledgeDocument).where(KnowledgeDocument.file_id == agent_file.id))
             for od in old_docs_res.scalars().all():
                 await db.execute(delete(KnowledgeChunk).where(KnowledgeChunk.document_id == od.id))
