@@ -124,124 +124,109 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Auth Warning for Demo Visitors */}
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
+      {/* Auth Warning for Visitors */}
       {!isLoggedIn && (
-        <div className="bg-amber-50/90 border border-amber-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-amber-900 shadow-xs">
+        <div className="bg-zinc-900 border border-zinc-800 p-3.5 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-zinc-300 shadow-subtle">
           <div className="flex items-center gap-2.5">
-            <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
             <div className="text-xs">
-              <span className="font-bold block">Canlı Ajan Bağlantısı İçin Oturum Açın</span>
-              <span className="text-amber-700">Ajanlarla canlı sohbet etmek, görev başlatmak ve dosyalarınızı işlemek için lütfen giriş yapın.</span>
+              <span className="font-medium text-zinc-100 mr-2">Oturum Açın</span>
+              <span className="text-zinc-400">Canlı ajan etkileşimi, görev başlatma ve döküman yönetimi için giriş yapmalısınız.</span>
             </div>
           </div>
           <Link
             href="/login"
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shrink-0 shadow-sm shadow-amber-600/20"
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shrink-0"
           >
-            Hızlı Giriş Yap →
+            Giriş Yap →
           </Link>
         </div>
       )}
 
-      {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-6 rounded-2xl border border-sky-100 shadow-xs">
+      {/* Top Header / Action Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
-          <div className="flex items-center gap-2 text-sky-700 text-xs font-bold uppercase tracking-wider mb-1">
-            <Sparkles className="w-4 h-4 text-sky-500" />
-            <span>Kurumsal Dijital İş Gücü</span>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Şirket Operasyon Merkezi
+          <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+            Workspace Overview
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Bağımsız çalışan dijital personellerinizi yönetin, görev atayın ve sonuçları izleyin.
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Yönetilen ajan servisleri, arka plan görevleri ve döküman çalışma alanları.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-sky-500/25 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            <span>Yeni AI Çalışan Oluştur</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Yeni Ajan Servisi</span>
           </button>
         </div>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {[
           {
-            label: "Aktif AI Çalışanlar",
+            label: "Aktif Ajanlar",
             value: agents.length.toString(),
-            change: "+1 bu hafta",
-            icon: Bot,
-            color: "text-sky-600 bg-sky-50 border-sky-100",
+            detail: "Çalışma alanları hazır",
           },
           {
-            label: "Devam Eden Görevler",
+            label: "Yürütülen Görevler",
             value: tasks.filter(t => t.status === "running").length.toString(),
-            change: "Gerçek zamanlı yürütülüyor",
-            icon: Zap,
-            color: "text-amber-600 bg-amber-50 border-amber-100",
+            detail: "Sandbox kuyruğu aktif",
           },
           {
-            label: "İşlenen Dökümanlar (RAG)",
-            value: "148 Dosya",
-            change: "Sistemde hazır",
-            icon: FolderKanban,
-            color: "text-indigo-600 bg-indigo-50 border-indigo-100",
+            label: "İşlenen Dökümanlar",
+            value: "148",
+            detail: "Döküman havuzunda",
           },
           {
-            label: "Aylık Token Tüketimi",
-            value: "2.4M Token",
-            change: "%24 Bütçe kullanıldı ($7.20)",
-            icon: TrendingUp,
-            color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+            label: "Aylık Tüketim",
+            value: "2.4M",
+            detail: "$7.20 / $30.00 bütçe",
           },
         ].map((metric, i) => {
-          const Icon = metric.icon;
           return (
             <div
               key={i}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between"
+              className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 shadow-subtle flex flex-col justify-between"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500">{metric.label}</span>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${metric.color}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
+                <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider">{metric.label}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
               </div>
-              <div className="mt-3">
-                <span className="text-2xl font-black text-slate-900 tracking-tight">{metric.value}</span>
-                <p className="text-[11px] text-slate-400 mt-1">{metric.change}</p>
+              <div className="mt-2.5">
+                <span className="text-xl font-semibold text-zinc-100 font-mono tracking-tight">{metric.value}</span>
+                <p className="text-[11px] font-mono text-zinc-500 mt-0.5">{metric.detail}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* AI Employees Grid Section */}
-      <div className="space-y-4">
+      {/* Agents Grid Section */}
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-slate-900">Şirket AI Çalışanları</h2>
-            <span className="text-xs bg-sky-50 text-sky-700 px-2.5 py-0.5 rounded-full font-semibold border border-sky-100">
-              {agents.length} Personel
+            <h2 className="text-sm font-semibold text-zinc-100">Ajan Servisleri</h2>
+            <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60 px-1.5 py-0.2 rounded">
+              {agents.length} Servis
             </span>
           </div>
           <Link
             href="/agents"
-            className="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1 transition"
+            className="text-xs text-zinc-400 hover:text-zinc-200 flex items-center gap-1 transition-colors duration-75"
           >
             <span>Tümünü Gör</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {agents.map((agent) => (
             <AgentCard key={agent.id} agent={agent} />
           ))}
@@ -249,66 +234,61 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Tasks & Execution Feed */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
-              <Activity className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Son Yürütülen Görevler</h2>
-              <p className="text-xs text-slate-400">Sandbox ve arka plan worker işleyişi</p>
-            </div>
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 shadow-subtle space-y-3.5">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div>
+            <h2 className="text-sm font-semibold text-zinc-100">Son Yürütülen Görevler</h2>
+            <p className="text-[11px] text-zinc-500">Sandbox ve kuyruk geçmişi</p>
           </div>
           <Link
             href="/tasks"
-            className="text-xs font-semibold text-sky-600 hover:text-sky-700 flex items-center gap-1 transition"
+            className="text-xs text-zinc-400 hover:text-zinc-200 flex items-center gap-1 transition-colors duration-75"
           >
             <span>Görev Havuzuna Git</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
 
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-zinc-800/80">
           {tasks.map((task) => {
             const isCompleted = task.status === "completed";
             const isRunning = task.status === "running";
             return (
-              <div key={task.id} className="py-4 flex items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div
-                    className={`mt-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${
-                      isCompleted
-                        ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-                        : isRunning
-                        ? "bg-sky-50 text-sky-600 border border-sky-200 animate-pulse"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {isCompleted ? "✓" : "●"}
+              <div key={task.id} className="py-3 flex items-center justify-between gap-4">
+                <div className="flex items-start gap-2.5">
+                  <div className="mt-1.5 shrink-0">
+                    <span
+                      className={`block w-1.5 h-1.5 rounded-full ${
+                        isCompleted
+                          ? "bg-emerald-500"
+                          : isRunning
+                          ? "bg-blue-500 animate-pulse"
+                          : "bg-zinc-600"
+                      }`}
+                    ></span>
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900">{task.title}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{task.input_prompt}</p>
+                    <h4 className="text-xs font-medium text-zinc-200">{task.title}</h4>
+                    <p className="text-[11px] text-zinc-500 mt-0.5 line-clamp-1">{task.input_prompt}</p>
                     {task.output_result && (
-                      <span className="inline-block text-[11px] text-slate-600 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded mt-1">
+                      <span className="inline-block text-[10px] font-mono text-zinc-400 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded mt-1">
                         Sonuç: {task.output_result}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 text-right">
+                <div className="flex items-center gap-2 shrink-0 text-right">
                   <span
-                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                       isCompleted
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        ? "bg-zinc-950 text-emerald-400 border-emerald-950/40"
                         : isRunning
-                        ? "bg-sky-50 text-sky-700 border-sky-200"
-                        : "bg-slate-50 text-slate-600 border-slate-200"
+                        ? "bg-zinc-950 text-blue-400 border-blue-950/40"
+                        : "bg-zinc-950 text-zinc-400 border-zinc-800"
                     }`}
                   >
-                    {isCompleted ? "Tamamlandı" : isRunning ? "İşleniyor..." : task.status}
+                    {isCompleted ? "Tamamlandı" : isRunning ? "İşleniyor" : task.status}
                   </span>
                 </div>
               </div>

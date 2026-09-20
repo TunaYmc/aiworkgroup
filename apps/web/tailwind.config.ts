@@ -9,30 +9,34 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#F8FAFC", // Ultra-light subtle slate-blue
-        surface: "#FFFFFF",    // Crisp pure white
-        card: "#FFFFFF",
-        border: "#E2E8F0",
+        background: "#09090b", // zinc-950
+        surface: "#18181b",    // zinc-900
+        card: "#18181b",       // zinc-900
+        border: "#27272a",     // zinc-800
+        accent: {
+          DEFAULT: "#2563EB", // Electric blue
+          hover: "#3B82F6",
+        },
         brand: {
-          50: "#F0F9FF",
-          100: "#E0F2FE",
-          200: "#BAE6FD",
-          300: "#7DD3FC",
-          400: "#38BDF8",
-          500: "#0EA5E9",  // Vibrant Light Blue
-          600: "#0284C7",  // Professional Blue Accent
-          700: "#0369A1",
-          800: "#075985",
-          900: "#0C4A6E",
+          50: "#EFF6FF",
+          100: "#DBEAFE",
+          200: "#BFDBFE",
+          300: "#93C5FD",
+          400: "#60A5FA",
+          500: "#3B82F6",
+          600: "#2563EB", // Electric Blue Primary
+          700: "#1D4ED8",
+          800: "#1E40AF",
+          900: "#1E3A8A",
         },
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       boxShadow: {
-        subtle: "0 1px 3px 0 rgba(14, 165, 233, 0.05), 0 1px 2px -1px rgba(14, 165, 233, 0.05)",
-        card: "0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.04)",
-        dropdown: "0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04)",
+        subtle: "0 1px 2px 0 rgba(0, 0, 0, 0.4)",
+        card: "0 1px 3px 0 rgba(0, 0, 0, 0.5)",
       }
     },
   },

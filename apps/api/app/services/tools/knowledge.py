@@ -104,7 +104,15 @@ class ReadDocumentTool(BaseTool):
                 chunks = res.scalars().all()
 
                 if not chunks:
-                    # Check files table
+                    # Check files table and fallback to direct parser/vision read
+                    from app.services.tools.filesystem import FileReadTool
+                    fr_res = await FileReadTool().execute({"filepath": filename}, context)
+                    if "content" in fr_res and fr_res["content"]:
+                        return {
+                            "filename": filename,
+                            "content": fr_res["content"]
+                        }
+
                     f_stmt = select(AgentFile).where(
                         (AgentFile.organization_id == org_id) &
                         (AgentFile.filename.ilike(f"%{filename}%"))
@@ -115,7 +123,7 @@ class ReadDocumentTool(BaseTool):
                         return {
                             "filename": f_obj.filename,
                             "status": f_obj.status,
-                            "content": f"Dosya sistemde mevcut ({f_obj.filename}), ancak içeriği henüz metin olarak ayrıştırılmamış."
+                            "content": f"Dosya sistemde mevcut ({f_obj.filename}), ancak içeriği henüz ayrıştırılamadı."
                         }
                     return {"error": f"'{filename}' adında bir şirket dökümanı bulunamadı."}
 

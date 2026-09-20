@@ -74,46 +74,46 @@ export default function AgentsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Şirket AI Personelleri
+          <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+            Ajan Servisleri
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            İzole çalışma alanlarına ve özelleştirilmiş araçlara sahip dijital çalışanlar
+          <p className="text-xs text-zinc-400 mt-0.5">
+            İzole çalışma alanlarına ve sandbox araçlarına sahip kurumsal servisler.
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-sky-500/25 cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          <span>Yeni AI Çalışan Oluştur</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>Yeni Ajan Servisi</span>
         </button>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-center gap-2.5 bg-zinc-900 p-2.5 rounded-lg border border-zinc-800">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="İsim veya uzmanlık alanına göre filtrele..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            className="w-full pl-8 pr-3 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded-md text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors duration-75"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-slate-400 shrink-0 hidden sm:block" />
+          <Filter className="w-3.5 h-3.5 text-zinc-500 shrink-0 hidden sm:block" />
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 w-full sm:w-auto"
+            className="px-2.5 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded-md text-zinc-300 focus:outline-none focus:border-blue-500 w-full sm:w-auto font-mono"
           >
             <option value="all">Tüm Roller</option>
             <option value="Sales Employee">Satış & Müşteri</option>
@@ -126,7 +126,7 @@ export default function AgentsPage() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredAgents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} />
         ))}

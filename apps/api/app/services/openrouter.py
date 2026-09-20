@@ -216,7 +216,7 @@ class OpenRouterService:
         """
         # Map model IDs to real OpenRouter model IDs
         MODEL_MAPPING = {
-            "google/gemini-3.1-pro": "google/gemini-3.1-pro-preview",
+            "google/gemini-3.1-pro": "google/gemini-3.8-flash",
             "google/gemini-3.7-flash": "google/gemini-3.7-flash",
             "google/gemini-3.8-flash": "google/gemini-3.8-flash",
             "google/gemini-3.5-flash": "google/gemini-3.5-flash",
@@ -330,7 +330,7 @@ class OpenRouterService:
         for fb in context.get("fallback_models", []):
             if fb and fb not in candidate_models:
                 candidate_models.append(fb)
-        for fb in ["openrouter/free", "meta-llama/llama-3.3-70b-instruct:free", "google/gemini-2.0-flash-001"]:
+        for fb in ["google/gemini-3.8-flash", "openai/gpt-4o-mini", "openrouter/free"]:
             if fb not in candidate_models:
                 candidate_models.append(fb)
 

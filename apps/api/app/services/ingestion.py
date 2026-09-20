@@ -61,7 +61,15 @@ class DocumentIngestionService:
             # 3. Generate Vector Embeddings (1536-dim)
             embeddings = await embedding_service.get_embeddings(chunks)
 
-            # 4. Create KnowledgeDocument
+            # 4. Remove existing KnowledgeDocument/Chunks if re-ingesting
+            from sqlalchemy import delete
+            old_docs_res = await db.execute(select(KnowledgeDocument).where(KnowledgeDocument.file_id == agent_file.id))
+            for od in old_docs_res.scalars().all():
+                await db.execute(delete(KnowledgeChunk).where(KnowledgeChunk.document_id == od.id))
+                await db.delete(od)
+            await db.flush()
+
+            # Create KnowledgeDocument
             doc = KnowledgeDocument(
                 organization_id=agent_file.organization_id,
                 agent_id=agent_file.agent_id,

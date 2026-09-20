@@ -127,65 +127,66 @@ export default function ModelsPage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-          Model Kataloğu & LLM Geçidi (OpenRouter)
+      <div className="pb-4 border-b border-zinc-800">
+        <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+          Modeller
         </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          Tüm AI personelleriniz için dinamik olarak değiştirilebilir inference modelleri ve maliyet oranları
+        <p className="text-xs text-zinc-400 mt-0.5">
+          OpenRouter geçidi üzerinden sunulan çıkarım modelleri ve maliyet oranları.
         </p>
       </div>
 
       {/* Model Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {models.map((model) => (
           <div
             key={model.id}
-            className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between"
+            className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle flex flex-col justify-between hover:border-zinc-700 transition-colors duration-75"
           >
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-base text-slate-900">{model.name}</h3>
+                    <h3 className="font-medium text-xs text-zinc-100">{model.name}</h3>
                     {model.is_default && (
-                      <span className="text-[10px] bg-sky-100 text-sky-700 px-2 py-0.5 rounded-md font-bold">
-                        Varsayılan
+                      <span className="text-[10px] font-mono bg-blue-950/40 text-blue-400 border border-blue-800/40 px-1.5 py-0.2 rounded">
+                        default
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-slate-400 font-mono mt-0.5 block">{model.id}</span>
+                  <span className="text-[11px] text-zinc-500 font-mono mt-0.5 block">{model.id}</span>
                 </div>
-                <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg">
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60">
                   {model.provider}
                 </span>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed">{model.description}</p>
+              <p className="text-xs text-zinc-400 leading-relaxed">{model.description}</p>
 
-              <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 text-xs">
+              <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-zinc-800/80 text-[11px] font-mono">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Bağlam Penceresi</span>
-                  <span className="font-bold text-slate-800">
+                  <span className="text-zinc-500 block text-[10px]">Bağlam:</span>
+                  <span className="text-zinc-300">
                     {(model.context_length / 1000).toFixed(0)}k token
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Giriş (1M Token)</span>
-                  <span className="font-bold text-slate-800">${model.prompt_price_per_1m}</span>
+                  <span className="text-zinc-500 block text-[10px]">Giriş (1M):</span>
+                  <span className="text-zinc-300">${model.prompt_price_per_1m}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Çıkış (1M Token)</span>
-                  <span className="font-bold text-slate-800">${model.completion_price_per_1m}</span>
+                  <span className="text-zinc-500 block text-[10px]">Çıkış (1M):</span>
+                  <span className="text-zinc-300">${model.completion_price_per_1m}</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 flex items-center justify-between text-xs text-slate-500">
-              <span className="flex items-center gap-1.5 text-emerald-600 font-medium">
-                <Check className="w-4 h-4" /> Tool Calling & Streaming Destekli
+            <div className="pt-3 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+              <span className="flex items-center gap-1.5 text-zinc-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>Tool Calling & Streaming</span>
               </span>
             </div>
           </div>

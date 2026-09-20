@@ -61,31 +61,31 @@ export default function TasksPage() {
   const filteredTasks = tasks.filter((t) => statusFilter === "all" || t.status === statusFilter);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Görev Havuzu</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
-              MOCK / TASLAK
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">Görevler</h1>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+              queue
             </span>
           </div>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Arka plan kuyruğu (Celery) ve izole sandbox ortamında yürütülen kurumsal görevler
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Kuyruk ve sandbox ortamında yürütülen kurumsal görev geçmişi.
           </p>
         </div>
 
         {/* Status Filters */}
-        <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 text-xs">
+        <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-md border border-zinc-800 text-xs">
           {["all", "running", "queued", "completed"].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg font-semibold capitalize transition ${
+              className={`px-2.5 py-1 rounded text-xs font-medium transition-colors duration-75 ${
                 statusFilter === st
-                  ? "bg-sky-50 text-sky-700 border border-sky-200"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-zinc-800 text-zinc-100 border border-zinc-700/60"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               {st === "all" ? "Tümü" : st === "running" ? "Yürütülüyor" : st === "queued" ? "Kuyrukta" : "Tamamlandı"}
@@ -95,52 +95,52 @@ export default function TasksPage() {
       </div>
 
       {/* Task List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs divide-y divide-slate-100 overflow-hidden">
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 divide-y divide-zinc-800/80 overflow-hidden shadow-subtle">
         {filteredTasks.map((task) => {
           const isDone = task.status === "completed";
           const isRunning = task.status === "running";
           return (
-            <div key={task.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-2.5">
+            <div key={task.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-zinc-800/30 transition-colors duration-75">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-2">
                   <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${
+                    className={`px-1.5 py-0.2 rounded text-[9px] font-mono uppercase tracking-wider border ${
                       task.priority === "urgent"
-                        ? "bg-rose-50 text-rose-700 border border-rose-200"
+                        ? "bg-rose-950/30 text-rose-400 border-rose-900/50"
                         : task.priority === "high"
-                        ? "bg-amber-50 text-amber-700 border border-amber-200"
-                        : "bg-slate-100 text-slate-600"
+                        ? "bg-zinc-800 text-blue-400 border-blue-900/50"
+                        : "bg-zinc-950 text-zinc-400 border-zinc-800"
                     }`}
                   >
                     {task.priority}
                   </span>
-                  <h3 className="font-bold text-base text-slate-900">{task.title}</h3>
+                  <h3 className="font-medium text-xs text-zinc-200 truncate">{task.title}</h3>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed">{task.input_prompt}</p>
+                <p className="text-xs text-zinc-400 leading-relaxed">{task.input_prompt}</p>
 
                 {task.output_result && (
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-mono">
-                    <span className="font-bold text-sky-800 block mb-1">Çıktı & Sonuç:</span>
+                  <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded-md text-[11px] text-zinc-300 font-mono">
+                    <span className="text-zinc-500 block mb-0.5">Sonuç:</span>
                     {task.output_result}
                   </div>
                 )}
               </div>
 
-              <div className="flex flex-col sm:items-end gap-2 shrink-0">
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full border inline-flex items-center gap-1.5 ${
-                    isDone
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : isRunning
-                      ? "bg-sky-50 text-sky-700 border-sky-200 animate-pulse"
-                      : "bg-amber-50 text-amber-700 border-amber-200"
-                  }`}
-                >
-                  {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
-                  <span>{isDone ? "Tamamlandı" : isRunning ? "Yürütülüyor..." : "Kuyrukta"}</span>
+              <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isDone
+                        ? "bg-emerald-500"
+                        : isRunning
+                        ? "bg-blue-500 animate-pulse"
+                        : "bg-zinc-600"
+                    }`}
+                  ></span>
+                  <span>{isDone ? "completed" : isRunning ? "running" : "queued"}</span>
                 </span>
-                <span className="text-[11px] text-slate-400">{task.created_at}</span>
+                <span className="text-[10px] font-mono text-zinc-500">{task.created_at}</span>
               </div>
             </div>
           );

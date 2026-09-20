@@ -123,7 +123,7 @@ export default function AgentWorkspacePage() {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMsgId
-              ? { ...m, content: "⚠️ Canlı ajana mesaj gönderebilmek için oturum açmalısınız. Giriş sayfasına yönlendiriliyorsunuz..." }
+              ? { ...m, content: "Canlı ajana mesaj gönderebilmek için oturum açmalısınız. Giriş sayfasına yönlendiriliyorsunuz..." }
               : m
           )
         );
@@ -151,7 +151,7 @@ export default function AgentWorkspacePage() {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMsgId
-                ? { ...m, content: "⚠️ Oturum süreniz doldu veya yetkilendirme geçersiz (HTTP 401). Giriş sayfasına yönlendiriliyorsunuz..." }
+                ? { ...m, content: "Oturum süreniz doldu veya yetkilendirme geçersiz (HTTP 401). Giriş sayfasına yönlendiriliyorsunuz..." }
                 : m
             )
           );
@@ -194,7 +194,7 @@ export default function AgentWorkspacePage() {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMsgId
-                ? { ...m, content: (m.content ? m.content + "\n\n" : "") + `⚠️ ${event.message}` }
+                ? { ...m, content: (m.content ? m.content + "\n\n" : "") + `Hata: ${event.message}` }
                 : m
             )
           );
@@ -292,132 +292,130 @@ export default function AgentWorkspacePage() {
   }
 
   return (
-    <div className="h-[calc(100vh-6rem)] flex flex-col md:flex-row gap-6 max-w-[1600px] mx-auto">
+    <div className="h-[calc(100vh-5.5rem)] flex flex-col md:flex-row gap-4 max-w-[1600px] mx-auto text-zinc-300">
       {/* ---------------- LEFT PANEL: Agent Info & Model Switcher ---------------- */}
-      <div className="w-full md:w-80 bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-xs shrink-0 overflow-y-auto">
-        <div className="space-y-5">
+      <div className="w-full md:w-72 bg-zinc-900 rounded-lg border border-zinc-800 p-4 flex flex-col justify-between shrink-0 overflow-y-auto">
+        <div className="space-y-4">
           {/* Header */}
-          <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-500 to-sky-100 flex items-center justify-center text-sky-700 font-bold border border-sky-200">
-              <Bot className="w-6 h-6 text-sky-700" />
+          <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-800">
+            <div className="w-8 h-8 rounded bg-zinc-800 border border-zinc-700/60 flex items-center justify-center text-zinc-200 font-mono text-xs font-semibold shrink-0">
+              {agent.name.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h2 className="font-bold text-slate-900 text-sm leading-snug">{agent.name}</h2>
-              <span className="text-[11px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md border border-sky-100 mt-1 inline-block">
+            <div className="min-w-0">
+              <h2 className="font-medium text-zinc-100 text-sm truncate">{agent.name}</h2>
+              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50 mt-0.5 inline-block">
                 {agent.role}
               </span>
             </div>
           </div>
 
-          {/* Model Switcher (Section 10 & 43) */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              Aktif Çıkarım Modeli (LLM)
+          {/* Model Switcher */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
+              Aktif Çıkarım Modeli
             </label>
             <select
               value={selectedModel}
               onChange={(e) => handleModelChange(e.target.value)}
-              className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full text-xs bg-zinc-950 border border-zinc-800 rounded-md p-2 text-zinc-200 focus:outline-none focus:border-blue-500 font-mono"
             >
-              <optgroup label="🤖 OpenAI (GPT-6 Astra)">
-                <option value="openai/gpt-6-astra-pro">GPT-6 Astra Pro (Yüksek / Pro Reasoning)</option>
-                <option value="openai/gpt-6-astra">GPT-6 Astra (Orta / Flagship)</option>
-                <option value="openai/gpt-4o-mini">GPT-4o Mini (Düşük / Hızlı)</option>
+              <optgroup label="OpenAI">
+                <option value="openai/gpt-6-astra-pro">GPT-6 Astra Pro · 1M Context</option>
+                <option value="openai/gpt-6-astra">GPT-6 Astra · Flagship</option>
+                <option value="openai/gpt-4o-mini">GPT-4o Mini · Fast</option>
               </optgroup>
-              <optgroup label="🧠 Anthropic (Claude Fable)">
-                <option value="anthropic/claude-fable-5.1">Claude Fable 5.1 (Yüksek / Mythos Tier)</option>
-                <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Orta / Hybrid Reasoning)</option>
-                <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku (Düşük / Hızlı)</option>
+              <optgroup label="Anthropic">
+                <option value="anthropic/claude-fable-5.1">Claude Fable 5.1 · Mythos Tier</option>
+                <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet · Hybrid</option>
+                <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku · Fast</option>
               </optgroup>
-              <optgroup label="🌐 Google (Gemini)">
-                <option value="google/gemini-3.1-pro">Gemini 3.1 Pro (Yüksek / 1M Context)</option>
-                <option value="google/gemini-3.8-flash">Gemini 3.8 Flash (Orta / 1M Context)</option>
-                <option value="google/gemini-3.7-flash">Gemini 3.7 Flash (Orta / Hibrit Zeka)</option>
-                <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (Düşük / Hızlı)</option>
+              <optgroup label="Google">
+                <option value="google/gemini-3.1-pro">Gemini 3.1 Pro · 1M Context</option>
+                <option value="google/gemini-3.8-flash">Gemini 3.8 Flash · Fast</option>
+                <option value="google/gemini-3.7-flash">Gemini 3.7 Flash · Hybrid</option>
+                <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
               </optgroup>
-              <optgroup label="⚡ DeepSeek (V4 Series)">
-                <option value="deepseek/deepseek-v4-pro">DeepSeek V4 Pro (Yüksek / MoE Reasoning)</option>
-                <option value="deepseek/deepseek-v4.1-flash">DeepSeek V4.1 Flash (Orta / CED Agentic)</option>
-                <option value="deepseek/deepseek-v4-flash">DeepSeek V4 Flash (Düşük / Sparse MoE)</option>
+              <optgroup label="DeepSeek">
+                <option value="deepseek/deepseek-v4-pro">DeepSeek V4 Pro · MoE</option>
+                <option value="deepseek/deepseek-v4.1-flash">DeepSeek V4.1 Flash · CED</option>
+                <option value="deepseek/deepseek-v4-flash">DeepSeek V4 Flash</option>
               </optgroup>
-              <optgroup label="🟢 Ücretsiz / Kotasız Modeller">
-                <option value="openrouter/free">OpenRouter Free Router (Otomatik Ücretsiz)</option>
-                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Instruct (Ücretsiz / Free)</option>
+              <optgroup label="Community / Open">
+                <option value="openrouter/free">OpenRouter Free Router</option>
+                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Instruct</option>
               </optgroup>
             </select>
-            <span className="text-[10px] text-slate-400 block">
-              Model değiştiğinde sohbet geçmişi ve agent hafızası korunur.
+            <span className="text-[10px] text-zinc-500 font-mono block">
+              Model değişiminde oturum hafızası korunur.
             </span>
           </div>
 
           {/* Sandbox & Permissions */}
-          <div className="space-y-2">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              Sandbox Araç İzinleri
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
+              Sandbox Araçları
             </span>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {agent.tool_permissions?.allowed_tools?.map((tool) => (
                 <div
                   key={tool}
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-100 text-xs text-slate-700"
+                  className="flex items-center gap-2 px-2 py-1 rounded bg-zinc-950/60 border border-zinc-800/80 text-[11px] font-mono text-zinc-300"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-sky-600" />
-                  <span className="font-mono text-[11px]">{tool}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                  <span className="truncate">{tool}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* System Instructions Preview */}
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-              Rol Talimatları
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
+              Sistem Talimatları
             </span>
-            <p className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed font-mono line-clamp-4">
+            <p className="text-[11px] text-zinc-400 bg-zinc-950/60 p-2 rounded border border-zinc-800/80 leading-relaxed font-mono line-clamp-4">
               {agent.system_instructions}
             </p>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <div className="pt-3 border-t border-zinc-800 flex items-center justify-between text-xs font-mono text-zinc-400">
           <span>Durum:</span>
-          <span className="font-semibold text-emerald-600 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Çevrimiçi
+          <span className="text-zinc-300 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> aktif
           </span>
         </div>
       </div>
 
       {/* ---------------- CENTER PANEL: Live Interactive Conversation ---------------- */}
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between overflow-hidden">
+      <div className="flex-1 bg-zinc-900 rounded-lg border border-zinc-800 shadow-subtle flex flex-col justify-between overflow-hidden">
         {/* Chat Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-sky-600" />
-            <h3 className="font-bold text-sm text-slate-900">Çalışma Sohbeti & Canlı Görev</h3>
+        <div className="px-5 py-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/60">
+          <div>
+            <h3 className="font-medium text-xs text-zinc-100">Ajan Workspace</h3>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-sky-500"></span>
-              Aktif Model: <strong className="text-slate-800">{selectedModel}</strong>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              <span>{selectedModel}</span>
             </span>
-            <div className="text-xs text-slate-400 hidden md:block">Tenant İzolasyonu Devrede</div>
+            <span className="text-[10px] font-mono text-zinc-500 hidden sm:inline">RLS Sandbox</span>
           </div>
         </div>
 
         {/* Message Stream */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-4">
+        <div className="flex-1 p-5 overflow-y-auto space-y-3.5">
           {!isLoggedIn && (
-            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-800 shadow-xs">
+            <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-md flex items-center justify-between text-xs text-zinc-400">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                 <span>Ajanla canlı mesajlaşmak ve araçları çalıştırmak için oturum açmalısınız.</span>
               </div>
               <button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shrink-0 transition flex items-center gap-1 cursor-pointer"
+                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-medium shrink-0 transition-colors duration-75 flex items-center gap-1 cursor-pointer"
               >
-                <LogIn className="w-3.5 h-3.5" />
                 <span>Giriş Yap</span>
               </button>
             </div>
@@ -428,24 +426,24 @@ export default function AgentWorkspacePage() {
             return (
               <div
                 key={msg.id}
-                className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
+                className={`flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}
               >
                 {!isUser && (
-                  <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 font-bold flex items-center justify-center text-xs shrink-0 border border-sky-200">
-                    <Bot className="w-4 h-4" />
+                  <div className="w-6 h-6 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px] font-semibold flex items-center justify-center shrink-0 border border-zinc-700/60 mt-0.5">
+                    {agent.name.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
+                  className={`max-w-[80%] rounded-md px-3.5 py-2.5 text-xs leading-relaxed ${
                     isUser
-                      ? "bg-sky-600 text-white rounded-tr-xs"
-                      : "bg-slate-50 border border-slate-200 text-slate-800 rounded-tl-xs"
+                      ? "bg-blue-600 text-white"
+                      : "bg-zinc-950 border border-zinc-800 text-zinc-200"
                   }`}
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   <span
-                    className={`text-[10px] mt-1.5 block ${
-                      isUser ? "text-sky-200 text-right" : "text-slate-400"
+                    className={`text-[9px] font-mono mt-1.5 block ${
+                      isUser ? "text-blue-200 text-right" : "text-zinc-500"
                     }`}
                   >
                     {msg.timestamp}
@@ -457,11 +455,11 @@ export default function AgentWorkspacePage() {
 
           {/* Live Activity Event (Thinking & Tool Streaming) */}
           {currentToolActivity && (
-            <div className="flex items-center gap-3 p-3 bg-sky-50/80 border border-sky-200 rounded-xl text-xs text-sky-800 animate-pulse">
-              <RefreshCw className="w-4 h-4 animate-spin text-sky-600 shrink-0" />
-              <div className="flex flex-col">
-                <span className="font-semibold">AI Çalışan İşlem Yapıyor</span>
-                <span className="text-[11px] text-sky-600">{currentToolActivity}</span>
+            <div className="flex items-center gap-2.5 p-2.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-300 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0"></span>
+              <div className="flex items-center gap-2">
+                <span className="text-zinc-400">İşlem:</span>
+                <span className="text-zinc-200 truncate">{currentToolActivity}</span>
               </div>
             </div>
           )}
@@ -470,7 +468,7 @@ export default function AgentWorkspacePage() {
         </div>
 
         {/* Input Bar */}
-        <div className="p-4 border-t border-slate-100 bg-white">
+        <div className="p-3 border-t border-zinc-800 bg-zinc-950/40">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -482,17 +480,17 @@ export default function AgentWorkspacePage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={`${agent.name} için bir görev veya soru yazın...`}
+              placeholder={`${agent.name} için bir komut veya soru yazın...`}
               disabled={isStreaming}
-              className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+              className="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors duration-75"
             />
             <button
               type="submit"
               disabled={!input.trim() || isStreaming}
-              className="px-5 py-3 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm shadow-sky-500/20 cursor-pointer"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75 cursor-pointer"
             >
-              <Send className="w-3.5 h-3.5" />
-              <span>Görev Ver</span>
+              <Send className="w-3 h-3" />
+              <span>Gönder</span>
             </button>
           </form>
         </div>

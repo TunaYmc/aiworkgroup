@@ -32,73 +32,78 @@ export default function UsagePage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Kullanım & Maliyet Yönetimi
-          </h1>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
-            MOCK / TASLAK
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+              Kullanım & Maliyet
+            </h1>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+              analytics
+            </span>
+          </div>
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Token tüketimi, model harcamaları ve organizasyon bütçe kontrolleri.
+          </p>
         </div>
-        <p className="text-sm text-slate-500 mt-0.5">
-          Tüm AI personellerinizin token tüketimi, model harcamaları ve organizasyon bütçe kontrolleri
-        </p>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <span className="text-xs font-bold text-slate-500 block">Toplam Token Tüketimi</span>
-          <span className="text-3xl font-black text-slate-900 mt-2 block">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle">
+          <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">Toplam Token</span>
+          <span className="text-xl font-semibold text-zinc-100 font-mono mt-1.5 block">
             {(summary.total_tokens / 1000000).toFixed(2)}M
           </span>
-          <div className="flex items-center gap-3 text-xs text-slate-400 mt-2">
+          <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 mt-1.5">
             <span>Giriş: {(summary.input_tokens / 1000).toFixed(0)}k</span>
-            <span>•</span>
+            <span>·</span>
             <span>Çıkış: {(summary.output_tokens / 1000).toFixed(0)}k</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <span className="text-xs font-bold text-slate-500 block">Tahmini Harcama</span>
-          <span className="text-3xl font-black text-sky-600 mt-2 block">
+        <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle">
+          <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">Tahmini Harcama</span>
+          <span className="text-xl font-semibold text-blue-400 font-mono mt-1.5 block">
             ${summary.estimated_cost_usd.toFixed(2)}
           </span>
-          <span className="text-xs text-slate-400 mt-2 block">
-            Aylık $100.00 bütçe kotasının %{((summary.estimated_cost_usd / 100) * 100).toFixed(1)}'i
+          <span className="text-[10px] font-mono text-zinc-500 mt-1.5 block">
+            Aylık $100.00 kotasının %{((summary.estimated_cost_usd / 100) * 100).toFixed(1)}'i
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <span className="text-xs font-bold text-slate-500 block">Organizasyon Bütçe Koruması</span>
-          <span className="text-3xl font-black text-emerald-600 mt-2 block">Aktif</span>
-          <span className="text-xs text-slate-400 mt-2 block">
-            Limit aşımında model çağrıları otomatik olarak kısıtlanır
+        <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle">
+          <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">Bütçe Koruması</span>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="text-sm font-medium text-zinc-200">Aktif</span>
+          </div>
+          <span className="text-[10px] text-zinc-500 mt-1.5 block leading-normal">
+            Limit aşımında çağrılar otomatik sınırlandırılır
           </span>
         </div>
       </div>
 
       {/* Breakdown Grids */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* By Model */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <h3 className="font-bold text-base text-slate-900">Modellere Göre Dağılım</h3>
-          <div className="space-y-3">
+        <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle space-y-3">
+          <h3 className="font-medium text-xs text-zinc-100">Modellere Göre Dağılım</h3>
+          <div className="space-y-2.5">
             {Object.entries(summary.by_model).map(([model, tokens]) => {
               const pct = ((tokens / summary.total_tokens) * 100).toFixed(0);
               return (
                 <div key={model} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-slate-700">{model}</span>
-                    <span className="font-bold text-slate-900">
-                      {(tokens / 1000).toFixed(0)}k token (%{pct})
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-zinc-400 truncate max-w-[220px]">{model}</span>
+                    <span className="text-zinc-200">
+                      {(tokens / 1000).toFixed(0)}k (%{pct})
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div className="bg-sky-500 h-2 rounded-full" style={{ width: `${pct}%` }}></div>
+                  <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-blue-600 h-1 rounded-full" style={{ width: `${pct}%` }}></div>
                   </div>
                 </div>
               );
@@ -107,21 +112,21 @@ export default function UsagePage() {
         </div>
 
         {/* By Agent */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-          <h3 className="font-bold text-base text-slate-900">AI Personellere Göre Dağılım</h3>
-          <div className="space-y-3">
+        <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle space-y-3">
+          <h3 className="font-medium text-xs text-zinc-100">Ajanlara Göre Dağılım</h3>
+          <div className="space-y-2.5">
             {Object.entries(summary.by_agent).map(([agentName, tokens]) => {
               const pct = ((tokens / summary.total_tokens) * 100).toFixed(0);
               return (
                 <div key={agentName} className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-700">{agentName}</span>
-                    <span className="font-bold text-slate-900">
-                      {(tokens / 1000).toFixed(0)}k token (%{pct})
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-zinc-400">{agentName}</span>
+                    <span className="text-zinc-200">
+                      {(tokens / 1000).toFixed(0)}k (%{pct})
                     </span>
                   </div>
-                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div className="bg-indigo-500 h-2 rounded-full" style={{ width: `${pct}%` }}></div>
+                  <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-blue-600 h-1 rounded-full" style={{ width: `${pct}%` }}></div>
                   </div>
                 </div>
               );

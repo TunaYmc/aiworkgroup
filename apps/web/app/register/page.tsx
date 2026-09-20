@@ -51,94 +51,94 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200 p-8 shadow-card space-y-6">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 text-zinc-300">
+      <div className="max-w-sm w-full bg-zinc-900 rounded-lg border border-zinc-800 p-6 shadow-card space-y-4">
         {/* Brand */}
-        <div className="flex flex-col items-center text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
-            <Sparkles className="w-6 h-6" />
+        <div className="flex flex-col items-center text-center space-y-1.5">
+          <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center text-white font-semibold text-xs tracking-wider">
+            YZ
           </div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
-            Şirketinizi Kaydedin
+          <h1 className="text-base font-semibold text-zinc-100 tracking-tight">
+            Organizasyon Kaydı
           </h1>
-          <p className="text-xs text-slate-500">
-            Dakikalar içinde izole AI çalışanlarınızı göreve başlatın
+          <p className="text-xs text-zinc-400">
+            Kurumsal ajan çalışma alanı oluşturun
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+          <div className="p-2.5 bg-rose-950/40 border border-rose-900/60 rounded-md text-xs text-rose-300 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Adınız & Soyadınız
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
+              Ad Soyad
             </label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <User className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Ahmet Yılmaz"
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Şirket / Organizasyon Adı
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
+              Şirket Adı
             </label>
             <div className="relative">
-              <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Building2 className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 required
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="Acme Holding A.Ş."
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
               İş E-postası
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ahmet@acme.com"
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Şifre Belirleyin
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
+              Şifre
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Lock className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="En az 8 karakter"
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 font-mono"
               />
             </div>
           </div>
@@ -146,16 +146,16 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-sm shadow-sky-500/20 cursor-pointer mt-2"
+            className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-subtle mt-2"
           >
-            <span>{loading ? "Organizasyon Kuruluyor..." : "Şirketi Oluştur ve Başla"}</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>{loading ? "Kuruluyor..." : "Kayıt Ol"}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
 
-        <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+        <div className="text-center pt-2 border-t border-zinc-800 text-xs text-zinc-400">
           Zaten bir şirket hesabınız var mı?{" "}
-          <Link href="/login" className="font-bold text-sky-600 hover:text-sky-700 underline">
+          <Link href="/login" className="font-medium text-blue-400 hover:text-blue-300">
             Giriş Yapın
           </Link>
         </div>

@@ -35,91 +35,79 @@ export default function AdminPage() {
   }, []);
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center border border-sky-200">
-            <ShieldCheck className="w-6 h-6" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+              Platform Yönetimi
+            </h1>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+              admin
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                Platform Süper Yönetici Masası (Admin)
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
-                MOCK / TASLAK
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Tüm şirket tenant'ları, worker kuyrukları ve global model bütçe kontrolü
-            </p>
-          </div>
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Tenant yönetimi, worker kuyrukları ve global kota kontrolleri.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Sistem Sağlığı: %100 Çalışır Durumda</span>
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>System Nominal</span>
         </div>
       </div>
 
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Toplam Şirket (Tenant)", value: stats.total_organizations, icon: Building2, color: "text-sky-600 bg-sky-50" },
-          { label: "Toplam AI Çalışan", value: stats.total_agents, icon: Bot, color: "text-indigo-600 bg-indigo-50" },
-          { label: "Yürütülen Görevler", value: stats.total_tasks, icon: CheckSquare, color: "text-emerald-600 bg-emerald-50" },
-          { label: "Global Token / Maliyet", value: `$${stats.total_platform_cost_usd.toFixed(2)}`, icon: BarChart3, color: "text-amber-600 bg-amber-50" },
+          { label: "Toplam Tenant", value: stats.total_organizations },
+          { label: "Toplam Ajan", value: stats.total_agents },
+          { label: "Yürütülen Görevler", value: stats.total_tasks },
+          { label: "Global Maliyet", value: `$${stats.total_platform_cost_usd.toFixed(2)}` },
         ].map((item, idx) => {
-          const Icon = item.icon;
           return (
-            <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500">{item.label}</span>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${item.color}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-              </div>
-              <span className="text-2xl font-black text-slate-900 block">{item.value}</span>
+            <div key={idx} className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 shadow-subtle space-y-1.5">
+              <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">{item.label}</span>
+              <span className="text-xl font-semibold text-zinc-100 font-mono block">{item.value}</span>
             </div>
           );
         })}
       </div>
 
       {/* Organizations Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900">Aktif Organizasyonlar & Tenant İzolasyonu</h2>
-          <span className="text-xs text-slate-400">PostgreSQL RLS ve Docker Sandbox Korumalı</span>
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 shadow-subtle overflow-hidden">
+        <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+          <h2 className="text-xs font-medium text-zinc-100">Organizasyonlar & Tenant İzolasyonu</h2>
+          <span className="text-[11px] font-mono text-zinc-500">PostgreSQL RLS & Sandbox</span>
         </div>
 
-        <div className="divide-y divide-slate-100 text-xs">
-          <div className="grid grid-cols-5 p-4 bg-slate-50/70 font-bold text-slate-500 uppercase tracking-wider">
-            <span className="col-span-2">Şirket Adı</span>
+        <div className="divide-y divide-zinc-800/80 text-xs">
+          <div className="grid grid-cols-5 p-3 bg-zinc-950/60 font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+            <span className="col-span-2">Şirket</span>
             <span>Slug / ID</span>
-            <span>AI Personeller</span>
+            <span>Ajan Sayısı</span>
             <span className="text-right">Durum</span>
           </div>
 
           {orgs.map((org) => (
-            <div key={org.id} className="grid grid-cols-5 p-4 items-center hover:bg-slate-50/50 transition">
+            <div key={org.id} className="grid grid-cols-5 p-3 items-center hover:bg-zinc-800/30 transition-colors duration-75">
               <div className="col-span-2 flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center font-bold">
+                <div className="w-6 h-6 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px] font-semibold border border-zinc-700/60 flex items-center justify-center shrink-0">
                   {org.name[0]}
                 </div>
                 <div>
-                  <span className="font-bold text-slate-900 block">{org.name}</span>
-                  <span className="text-[11px] text-slate-400">{org.plan} Plan</span>
+                  <span className="font-medium text-xs text-zinc-200 block">{org.name}</span>
+                  <span className="text-[10px] font-mono text-zinc-500">{org.plan}</span>
                 </div>
               </div>
 
-              <span className="font-mono text-slate-600">{org.slug}</span>
-              <span className="font-semibold text-slate-800">{org.agents} Aktif Agent</span>
+              <span className="font-mono text-zinc-400 text-[11px]">{org.slug}</span>
+              <span className="font-mono text-zinc-300 text-[11px]">{org.agents} Ajan</span>
 
-              <div className="text-right">
-                <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-semibold text-[11px]">
-                  İzole & Güvenli
-                </span>
+              <div className="flex items-center justify-end gap-1.5 text-[11px] font-mono text-zinc-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>isolated</span>
               </div>
             </div>
           ))}

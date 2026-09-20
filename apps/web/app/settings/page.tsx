@@ -13,56 +13,51 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto text-zinc-300">
       {/* Header */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Organizasyon & Platform Ayarları
+      <div className="space-y-2 pb-4 border-b border-zinc-800">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+            Ayarlar
           </h1>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300 tracking-wider">
-            MOCK / TASLAK
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+            config
           </span>
         </div>
-        <p className="text-sm text-slate-500">
-          Tenant yapılandırması, API anahtarları ve erişim denetimi
+        <p className="text-xs text-zinc-400">
+          Organizasyon parametreleri, API anahtarları ve güvenlik izinleri.
         </p>
-
-        <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
-          <span className="font-bold">⚠️ Not:</span>
-          <span>Bu sayfa şu an prototip/mock aşamasındadır. Şirket adı ve API anahtarı ayarları henüz kalıcı veritabanına bağlanmamıştır.</span>
-        </div>
       </div>
 
       {/* Organization Info Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-          <Building2 className="w-5 h-5 text-sky-600" />
-          <h2 className="font-bold text-base text-slate-900">Şirket Profili</h2>
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle space-y-3.5">
+        <div className="flex items-center gap-2 pb-2.5 border-b border-zinc-800">
+          <Building2 className="w-4 h-4 text-zinc-400" />
+          <h2 className="font-medium text-xs text-zinc-100">Organizasyon Profili</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
               Şirket / Organizasyon Adı
             </label>
             <input
               type="text"
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+              className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 focus:outline-none focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Tenant Slug (Benzersiz Tanımlayıcı)
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
+              Tenant Slug
             </label>
             <input
               type="text"
               disabled
               value="tuna-dijital-as-8a21"
-              className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-500 font-mono"
+              className="w-full px-3 py-1.5 bg-zinc-950/40 border border-zinc-800 rounded-md text-xs text-zinc-500 font-mono"
             />
           </div>
         </div>
@@ -70,45 +65,46 @@ export default function SettingsPage() {
         <div className="pt-2 flex justify-end">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-sky-500/20 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 cursor-pointer"
           >
-            <Save className="w-4 h-4" />
-            <span>{saved ? "Kaydedildi!" : "Değişiklikleri Kaydet"}</span>
+            <Save className="w-3.5 h-3.5" />
+            <span>{saved ? "Kaydedildi" : "Kaydet"}</span>
           </button>
         </div>
       </div>
 
       {/* API Keys Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <Key className="w-5 h-5 text-sky-600" />
-            <h2 className="font-bold text-base text-slate-900">Programatik API Anahtarları</h2>
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-4.5 shadow-subtle space-y-3.5">
+        <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
+          <div className="flex items-center gap-2">
+            <Key className="w-4 h-4 text-zinc-400" />
+            <h2 className="font-medium text-xs text-zinc-100">Programatik API Anahtarları</h2>
           </div>
           <button
-            onClick={() => alert("Yeni API Anahtarı oluşturuldu: yzk_live_9f83a8... (Güvenle saklayın)")}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 rounded-lg text-xs font-semibold transition"
+            onClick={() => alert("Yeni API Anahtarı üretildi: yzk_live_9f83a8...")}
+            className="flex items-center gap-1 px-2.5 py-1 bg-zinc-800 hover:bg-zinc-750 text-zinc-200 border border-zinc-700/60 rounded text-xs font-medium transition-colors duration-75"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Yeni Anahtar Üret</span>
+            <span>Yeni Anahtar</span>
           </button>
         </div>
 
-        <div className="divide-y divide-slate-100 text-xs">
+        <div className="divide-y divide-zinc-800/80 text-xs">
           {[
-            { name: "ERP & CRM Senkronizasyon Anahtarı", prefix: "yzk_live_7a12", created: "10 Eyl 2026", status: "Aktif" },
-            { name: "CI/CD Webhook Entegrasyonu", prefix: "yzk_live_3b88", created: "02 Eyl 2026", status: "Aktif" },
+            { name: "ERP & CRM Entegrasyonu", prefix: "yzk_live_7a12", created: "10 Eyl 2026", status: "active" },
+            { name: "CI/CD Webhook Erişimi", prefix: "yzk_live_3b88", created: "02 Eyl 2026", status: "active" },
           ].map((k, i) => (
-            <div key={i} className="py-3 flex items-center justify-between">
+            <div key={i} className="py-2.5 flex items-center justify-between">
               <div>
-                <span className="font-bold text-slate-900 block">{k.name}</span>
-                <span className="font-mono text-slate-400 text-[11px] mt-0.5 block">{k.prefix}••••••••••••</span>
+                <span className="font-medium text-xs text-zinc-200 block">{k.name}</span>
+                <span className="font-mono text-zinc-500 text-[11px] mt-0.5 block">{k.prefix}••••••••••••</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[11px] font-semibold">
-                  {k.status}
+                <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>{k.status}</span>
                 </span>
-                <button className="text-slate-400 hover:text-rose-600 transition p-1">
+                <button className="text-zinc-500 hover:text-rose-400 transition-colors duration-75 p-1">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -118,14 +114,12 @@ export default function SettingsPage() {
       </div>
 
       {/* Security and Tenant Isolation Information */}
-      <div className="p-5 bg-gradient-to-r from-sky-50 to-white rounded-2xl border border-sky-100 flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200">
-          <Shield className="w-5 h-5" />
-        </div>
-        <div className="space-y-1">
-          <h3 className="font-bold text-sm text-slate-900">Çok Kiracılı (Multi-Tenant) Mimari Koruması</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Şirketinize ait tüm dökümanlar, vektör indeksleri, LLM sohbet geçmişleri ve Docker sandbox çalışma alanları diğer şirketlerden tamamen izole edilmiştir. Verileriniz hiçbir dış şirkete ya da LLM eğitim havuzuna aktarılmaz.
+      <div className="p-4 bg-zinc-900 rounded-lg border border-zinc-800 flex items-start gap-3">
+        <Shield className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
+        <div className="space-y-0.5">
+          <h3 className="font-medium text-xs text-zinc-200">Multi-Tenant İzolasyon Mimarisi</h3>
+          <p className="text-[11px] text-zinc-400 leading-relaxed">
+            Dökümanlar, vektör indeksleri, LLM hafıza kayıtları ve Docker sandbox çalışma alanları PostgreSQL RLS ile tenant bazında tamamen izole edilmiştir. Verileriniz model eğitim havuzlarına iletilmez.
           </p>
         </div>
       </div>

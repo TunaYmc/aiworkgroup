@@ -102,22 +102,22 @@ export default function FilesPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-            Şirket Dökümanları & Bilgi Tabanı
+          <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+            Dökümanlar
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Sistemde saklanan ve yapay zeka ile entegre kurumsal dosyalar (Modele veya size özel)
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Kurumsal döküman havuzu ve ajan çalışma dosyaları.
           </p>
         </div>
 
         {/* Upload Button */}
-        <label className="flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-sm shadow-sky-500/25 cursor-pointer">
-          <UploadCloud className="w-4 h-4" />
-          <span>{uploading ? "İşleniyor..." : "Yeni Döküman Yükle"}</span>
+        <label className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-xs font-medium transition-colors duration-75 shadow-subtle cursor-pointer shrink-0">
+          <UploadCloud className="w-3.5 h-3.5" />
+          <span>{uploading ? "İşleniyor..." : "Döküman Yükle"}</span>
           <input
             type="file"
             onChange={handleFileUpload}
@@ -129,63 +129,63 @@ export default function FilesPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex items-center gap-3">
-        <Search className="w-4 h-4 text-slate-400" />
+      <div className="bg-zinc-900 p-2.5 rounded-lg border border-zinc-800 flex items-center gap-2.5">
+        <Search className="w-3.5 h-3.5 text-zinc-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Yüklenmiş dökümanlar arasında ara..."
-          className="w-full text-xs bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none"
+          placeholder="Dökümanlarda ara..."
+          className="w-full text-xs bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors duration-75 font-mono"
         />
       </div>
 
       {/* Files List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs divide-y divide-slate-100 overflow-hidden">
+      <div className="bg-zinc-900 rounded-lg border border-zinc-800 divide-y divide-zinc-800/80 overflow-hidden shadow-subtle">
         {filteredFiles.map((file) => (
-          <div key={file.id} className="p-5 flex items-center justify-between gap-4 hover:bg-slate-50/50 transition">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 border border-sky-100 flex items-center justify-center">
-                <FileText className="w-5 h-5" />
+          <div key={file.id} className="p-3.5 flex items-center justify-between gap-4 hover:bg-zinc-800/40 transition-colors duration-75">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded bg-zinc-800 border border-zinc-700/60 text-zinc-400 flex items-center justify-center shrink-0">
+                <FileText className="w-3.5 h-3.5" />
               </div>
-              <div>
-                <h4 className="text-sm font-bold text-slate-900">{file.filename}</h4>
-                <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
+              <div className="min-w-0">
+                <h4 className="text-xs font-medium text-zinc-200 truncate">{file.filename}</h4>
+                <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 mt-0.5">
                   <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
-                  <span>•</span>
+                  <span>·</span>
                   <span>{file.created_at}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold mr-2">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Hazır</span>
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 mr-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>ready</span>
               </span>
 
               <button
                 onClick={() => handleDownload(file, true)}
                 title="Önizle"
-                className="p-2 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-sky-50 transition"
+                className="p-1.5 text-zinc-400 hover:text-blue-400 rounded hover:bg-zinc-800 transition-colors duration-75"
               >
-                <Eye className="w-4 h-4" />
+                <Eye className="w-3.5 h-3.5" />
               </button>
 
               <button
                 onClick={() => handleDownload(file, false)}
                 title="İndir"
-                className="p-2 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-sky-50 transition"
+                className="p-1.5 text-zinc-400 hover:text-blue-400 rounded hover:bg-zinc-800 transition-colors duration-75"
               >
-                <Download className="w-4 h-4" />
+                <Download className="w-3.5 h-3.5" />
               </button>
 
               <button
                 onClick={() => alert("Dosya silme yetkisi tenant yöneticisine aittir.")}
                 title="Sil"
-                className="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
+                className="p-1.5 text-zinc-500 hover:text-rose-400 rounded hover:bg-zinc-800 transition-colors duration-75"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

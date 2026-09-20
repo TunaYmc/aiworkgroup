@@ -61,60 +61,60 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200 p-8 shadow-card space-y-6">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 text-zinc-300">
+      <div className="max-w-sm w-full bg-zinc-900 rounded-lg border border-zinc-800 p-6 shadow-card space-y-5">
         {/* Brand */}
-        <div className="flex flex-col items-center text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
-            <Sparkles className="w-6 h-6" />
+        <div className="flex flex-col items-center text-center space-y-1.5">
+          <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center text-white font-semibold text-xs tracking-wider">
+            YZ
           </div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
-            YapayZeka<span className="text-sky-600">Çalışan</span>
+          <h1 className="text-base font-semibold text-zinc-100 tracking-tight">
+            YapayZeka<span className="text-blue-500">Platform</span>
           </h1>
-          <p className="text-xs text-slate-500">
-            Kurumsal AI Operasyon Paneline Giriş Yapın
+          <p className="text-xs text-zinc-400">
+            Kurumsal Yönetim Masası Girişi
           </p>
         </div>
 
         {error && (
-          <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+          <div className="p-2.5 bg-rose-950/40 border border-rose-900/60 rounded-md text-xs text-rose-300 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
               İş E-postası
             </label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="ad.soyad@sirket.com"
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
               Şifre
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Lock className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 font-mono"
               />
             </div>
           </div>
@@ -122,57 +122,57 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition shadow-sm shadow-sky-500/20 cursor-pointer"
+            className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-subtle"
           >
             <span>{loading ? "Giriş Yapılıyor..." : "Giriş Yap"}</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
 
         {/* Quick Demo Access Section */}
-        <div className="pt-4 border-t border-slate-100 space-y-2.5">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center">
-            ⚡ Tek Tıkla Hızlı Test Girişi
+        <div className="pt-3 border-t border-zinc-800 space-y-2">
+          <p className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 text-center">
+            Hızlı Test Girişi
           </p>
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 gap-1.5">
             <button
               type="button"
               onClick={() => executeLogin("demo@acme.com", "Demo12345!")}
               disabled={loading}
-              className="w-full py-2.5 px-3 bg-sky-50 hover:bg-sky-100/80 border border-sky-200 text-sky-800 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer"
+              className="w-full py-2 px-2.5 bg-zinc-950 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-300 rounded-md text-xs font-medium flex items-center justify-between transition-colors duration-75 cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center text-[10px] font-bold">TD</span>
+                <span className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60 flex items-center justify-center text-[10px] font-mono">TD</span>
                 <span className="text-left">
-                  <span className="block font-bold">Tuna Demir (Demo Şirket)</span>
-                  <span className="block text-[10px] text-sky-600">demo@acme.com</span>
+                  <span className="block text-zinc-200">Tuna Demir</span>
+                  <span className="block text-[10px] font-mono text-zinc-500">demo@acme.com</span>
                 </span>
               </div>
-              <span className="text-[11px] font-bold text-sky-600">Hızlı Giriş →</span>
+              <span className="text-[11px] font-mono text-blue-400">Giriş →</span>
             </button>
 
             <button
               type="button"
               onClick={() => executeLogin("admin@platform.com", "Admin12345!")}
               disabled={loading}
-              className="w-full py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-between transition cursor-pointer"
+              className="w-full py-2 px-2.5 bg-zinc-950 hover:bg-zinc-800/80 border border-zinc-800 text-zinc-300 rounded-md text-xs font-medium flex items-center justify-between transition-colors duration-75 cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold">AD</span>
+                <span className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60 flex items-center justify-center text-[10px] font-mono">AD</span>
                 <span className="text-left">
-                  <span className="block font-bold">Platform Admin</span>
-                  <span className="block text-[10px] text-slate-500">admin@platform.com</span>
+                  <span className="block text-zinc-200">Platform Admin</span>
+                  <span className="block text-[10px] font-mono text-zinc-500">admin@platform.com</span>
                 </span>
               </div>
-              <span className="text-[11px] font-bold text-slate-500">Hızlı Giriş →</span>
+              <span className="text-[11px] font-mono text-zinc-400">Giriş →</span>
             </button>
           </div>
         </div>
 
-        <div className="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
-          Henüz şirket hesabınız yok mu?{" "}
-          <Link href="/register" className="font-bold text-sky-600 hover:text-sky-700 underline">
-            Yeni Şirket Kaydı Açın
+        <div className="text-center pt-2 border-t border-zinc-800 text-xs text-zinc-400">
+          Hesabınız yok mu?{" "}
+          <Link href="/register" className="font-medium text-blue-400 hover:text-blue-300">
+            Kayıt Açın
           </Link>
         </div>
       </div>

@@ -44,29 +44,56 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"Database initialization deferred: {e}")
 
-    # Sync existing knowledge documents to tenant filesystem
+    # Ensure visual/scanned documents are properly ingested with multimodal vision
     try:
         from app.core.database import AsyncSessionLocal
         from app.models.knowledge import KnowledgeDocument, KnowledgeChunk
+        from app.models.agent import AgentFile
+        from app.services.ingestion import ingestion_service
+        from app.services.storage import storage_service
         from sqlalchemy import select
         import os
+
         async with AsyncSessionLocal() as session:
-            doc_res = await session.execute(select(KnowledgeDocument))
-            docs = doc_res.scalars().all()
-            for doc in docs:
-                c_res = await session.execute(
-                    select(KnowledgeChunk)
-                    .where(KnowledgeChunk.document_id == doc.id)
-                    .order_by(KnowledgeChunk.chunk_index.asc())
+            files_res = await session.execute(select(AgentFile))
+            all_files = files_res.scalars().all()
+            for af in all_files:
+                doc_res = await session.execute(
+                    select(KnowledgeDocument).where(KnowledgeDocument.file_id == af.id)
                 )
-                chunks = c_res.scalars().all()
-                if chunks:
-                    doc_text = "\n\n".join(c.content for c in chunks)
-                    # (REMOVED: User requested not to automatically convert to .txt)
-                    pass
-        logger.info("Knowledge documents synced to workspace filesystem successfully.")
+                doc = doc_res.scalars().first()
+                needs_reingest = False
+                if not doc or (doc.total_chunks or 0) == 0:
+                    needs_reingest = True
+                else:
+                    c_res = await session.execute(
+                        select(KnowledgeChunk).where(KnowledgeChunk.document_id == doc.id)
+                    )
+                    chunks = c_res.scalars().all()
+                    total_len = sum(len(c.content) for c in chunks)
+                    # If total text is short or was parsed by weak OCR, re-parse with multimodal vision
+                    if total_len < 800:
+                        needs_reingest = True
+
+                if needs_reingest:
+                    file_bytes = None
+                    try:
+                        file_bytes = storage_service.download_file(af.storage_key)
+                    except Exception:
+                        pass
+                    if not file_bytes:
+                        fpath = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, af.organization_id, "documents", af.filename)
+                        if os.path.exists(fpath):
+                            with open(fpath, "rb") as f_in:
+                                file_bytes = f_in.read()
+
+                    if file_bytes:
+                        logger.info(f"Re-ingesting visual/scanned document with multimodal vision: {af.filename}")
+                        await ingestion_service.ingest_file(session, af, file_bytes)
+
+        logger.info("Knowledge documents verified and synced with multimodal vision.")
     except Exception as sync_err:
-        logger.warning(f"Document filesystem sync deferred: {sync_err}")
+        logger.warning(f"Document multimodal vision sync deferred: {sync_err}")
 
     yield
     await engine.dispose()

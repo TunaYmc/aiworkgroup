@@ -113,7 +113,7 @@ class FileReadTool(BaseTool):
 
         try:
             lower_name = found_path.lower()
-            if lower_name.endswith((".pdf", ".docx", ".xlsx", ".pptx")):
+            if lower_name.endswith((".pdf", ".docx", ".xlsx", ".pptx", ".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff")):
                 from app.services.parsers.factory import parser_factory
                 with open(found_path, "rb") as f_bin:
                     parse_res = parser_factory.get_parser(found_path).parse(f_bin.read(), os.path.basename(found_path))
