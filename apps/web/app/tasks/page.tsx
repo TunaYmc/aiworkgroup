@@ -61,7 +61,7 @@ export default function TasksPage() {
   const filteredTasks = tasks.filter((t) => statusFilter === "all" || t.status === statusFilter);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
+    <div className="w-full max-w-7xl space-y-6 text-zinc-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
@@ -104,7 +104,7 @@ export default function TasksPage() {
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`px-1.5 py-0.2 rounded text-[9px] font-mono uppercase tracking-wider border ${
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${
                       task.priority === "urgent"
                         ? "bg-rose-950/30 text-rose-400 border-rose-900/50"
                         : task.priority === "high"

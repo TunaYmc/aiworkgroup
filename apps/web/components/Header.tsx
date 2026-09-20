@@ -20,7 +20,7 @@ export default function Header() {
   };
 
   return (
-    <header className="h-14 bg-zinc-950/80 backdrop-blur border-b border-zinc-800/80 px-6 flex items-center justify-between sticky top-0 z-10">
+    <header className="h-14 bg-zinc-950/80 backdrop-blur border-b border-zinc-800/80 px-6 md:px-8 flex items-center justify-between sticky top-0 z-10">
       {/* Organization Switcher */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 px-2.5 py-1 rounded-md border border-zinc-800 bg-zinc-900/60 hover:bg-zinc-800/60 transition-colors duration-75 cursor-pointer text-zinc-300 text-xs font-medium">

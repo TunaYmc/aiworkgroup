@@ -292,7 +292,7 @@ export default function AgentWorkspacePage() {
   }
 
   return (
-    <div className="h-[calc(100vh-5.5rem)] flex flex-col md:flex-row gap-4 max-w-[1600px] mx-auto text-zinc-300">
+    <div className="h-[calc(100vh-5.5rem)] flex flex-col md:flex-row gap-4 w-full max-w-7xl text-zinc-300">
       {/* ---------------- LEFT PANEL: Agent Info & Model Switcher ---------------- */}
       <div className="w-full md:w-72 bg-zinc-900 rounded-lg border border-zinc-800 p-4 flex flex-col justify-between shrink-0 overflow-y-auto">
         <div className="space-y-4">

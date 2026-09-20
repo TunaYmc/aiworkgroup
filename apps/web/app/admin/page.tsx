@@ -35,7 +35,7 @@ export default function AdminPage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
+    <div className="w-full max-w-7xl space-y-6 text-zinc-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>

@@ -124,7 +124,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-zinc-300">
+    <div className="w-full max-w-7xl space-y-6 text-zinc-300">
       {/* Auth Warning for Visitors */}
       {!isLoggedIn && (
         <div className="bg-zinc-900 border border-zinc-800 p-3.5 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-3 text-zinc-300 shadow-subtle">
@@ -147,9 +147,14 @@ export default function DashboardPage() {
       {/* Top Header / Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
-            Workspace Overview
-          </h1>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-lg font-semibold text-zinc-100 tracking-tight">
+              Workspace Overview
+            </h1>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60">
+              overview
+            </span>
+          </div>
           <p className="text-xs text-zinc-400 mt-0.5">
             Yönetilen ajan servisleri, arka plan görevleri ve döküman çalışma alanları.
           </p>
