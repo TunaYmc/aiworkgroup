@@ -17,6 +17,8 @@ import {
   AlertCircle,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
+  Settings,
   RefreshCw,
   FolderOpen,
   LogIn
@@ -54,6 +56,19 @@ export default function AgentWorkspacePage() {
   const [activeAssistantMsgId, setActiveAssistantMsgId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState("anthropic/claude-3.7-sonnet");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const thinkingStartTimeRef = useRef<number>(0);
@@ -495,6 +510,36 @@ export default function AgentWorkspacePage() {
   };
 
 
+  
+  const AVAILABLE_MODELS = [
+    { id: "openai/gpt-6-astra-pro", name: "GPT-6 Astra Pro", provider: "OpenAI" },
+    { id: "openai/gpt-6-astra", name: "GPT-6 Astra", provider: "OpenAI" },
+    { id: "openai/gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI" },
+    { id: "anthropic/claude-fable-5.1", name: "Claude Fable 5.1", provider: "Anthropic" },
+    { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7 Sonnet", provider: "Anthropic" },
+    { id: "anthropic/claude-3.5-haiku", name: "Claude 3.5 Haiku", provider: "Anthropic" },
+    { id: "google/gemini-3.1-pro", name: "Gemini 3.1 Pro", provider: "Google" },
+    { id: "google/gemini-3.8-flash", name: "Gemini 3.8 Flash", provider: "Google" },
+    { id: "google/gemini-3.7-flash", name: "Gemini 3.7 Flash", provider: "Google" },
+    { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash", provider: "Google" },
+    { id: "deepseek/deepseek-v4-pro", name: "DeepSeek V4 Pro", provider: "DeepSeek" },
+    { id: "deepseek/deepseek-v4.1-flash", name: "DeepSeek V4.1 Flash", provider: "DeepSeek" },
+    { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash", provider: "DeepSeek" },
+    { id: "openrouter/free", name: "OpenRouter Free", provider: "OpenRouter" },
+    { id: "meta-llama/llama-3.3-70b-instruct:free", name: "Llama 3.3 70B", provider: "Meta" }
+  ];
+  
+  const getProviderIcon = (provider: string) => {
+    switch (provider) {
+      case "OpenAI": return "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg";
+      case "Anthropic": return "https://upload.wikimedia.org/wikipedia/commons/7/78/Anthropic_logo.svg";
+      case "Google": return "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg";
+      case "DeepSeek": return "https://chat.deepseek.com/favicon.svg";
+      case "Meta": return "https://upload.wikimedia.org/wikipedia/commons/a/ab/Meta-Logo.png";
+      default: return "https://openrouter.ai/favicon.ico";
+    }
+  };
+
   const handleModelChange = async (newModel: string) => {
     setSelectedModel(newModel);
     try {
@@ -508,22 +553,7 @@ export default function AgentWorkspacePage() {
 
   if (loadingAgent || !agent) {
     return (
-      <div className="h-[calc(100vh-5.5rem)] flex flex-col md:flex-row gap-4 w-full max-w-7xl animate-pulse">
-        <div className="w-full md:w-72 bg-zinc-900 rounded-lg border border-zinc-800 p-4 space-y-4 shrink-0">
-          <div className="flex items-center gap-3 pb-3 border-b border-zinc-800">
-            <div className="w-8 h-8 rounded bg-zinc-800 shrink-0" />
-            <div className="space-y-1.5 flex-1">
-              <div className="h-3.5 bg-zinc-800 rounded w-3/4" />
-              <div className="h-2.5 bg-zinc-800 rounded w-1/2" />
-            </div>
-          </div>
-          <div className="h-8 bg-zinc-800 rounded-md w-full" />
-          <div className="space-y-2 pt-2">
-            <div className="h-3 bg-zinc-800 rounded w-1/3" />
-            <div className="h-6 bg-zinc-800 rounded w-full" />
-            <div className="h-6 bg-zinc-800 rounded w-full" />
-          </div>
-        </div>
+      <div className="h-[calc(100vh-5.5rem)] flex gap-4 w-full max-w-7xl animate-pulse">
         <div className="flex-1 bg-zinc-900 rounded-lg border border-zinc-800 p-5 flex flex-col justify-between">
           <div className="space-y-4">
             <div className="h-14 bg-zinc-800/80 rounded-md w-2/3" />
@@ -538,106 +568,6 @@ export default function AgentWorkspacePage() {
 
   return (
     <div className="h-[calc(100vh-5.5rem)] flex flex-col md:flex-row gap-4 w-full max-w-7xl text-zinc-300">
-      {/* ---------------- LEFT PANEL: Agent Info & Model Switcher ---------------- */}
-      <div className="w-full md:w-72 bg-zinc-900 rounded-lg border border-zinc-800 p-4 flex flex-col justify-between shrink-0 overflow-y-auto">
-        <div className="space-y-4">
-          {/* Header */}
-          <div className="flex items-center gap-2.5 pb-3 border-b border-zinc-800">
-            <div className="w-8 h-8 rounded bg-zinc-800 border border-zinc-700/60 flex items-center justify-center text-zinc-200 font-mono text-xs font-semibold shrink-0">
-              {agent.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <h2 className="font-medium text-zinc-100 text-sm truncate">{agent.name}</h2>
-              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50 mt-0.5 inline-block">
-                {agent.role}
-              </span>
-            </div>
-          </div>
-
-          {/* Model Switcher */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
-              Aktif Çıkarım Modeli
-            </label>
-            <select
-              value={selectedModel}
-              onChange={(e) => handleModelChange(e.target.value)}
-              className="w-full text-xs bg-zinc-950 border border-zinc-800 rounded-md p-2 text-zinc-200 focus:outline-none focus:border-blue-500 font-mono"
-            >
-              <optgroup label="OpenAI">
-                <option value="openai/gpt-6-astra-pro">GPT-6 Astra Pro · 1M Context</option>
-                <option value="openai/gpt-6-astra">GPT-6 Astra · Flagship</option>
-                <option value="openai/gpt-4o-mini">GPT-4o Mini · Fast</option>
-              </optgroup>
-              <optgroup label="Anthropic">
-                <option value="anthropic/claude-fable-5.1">Claude Fable 5.1 · Mythos Tier</option>
-                <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet · Hybrid</option>
-                <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku · Fast</option>
-              </optgroup>
-              <optgroup label="Google">
-                <option value="google/gemini-3.1-pro">Gemini 3.1 Pro · 1M Context</option>
-                <option value="google/gemini-3.8-flash">Gemini 3.8 Flash · Fast</option>
-                <option value="google/gemini-3.7-flash">Gemini 3.7 Flash · Hybrid</option>
-                <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
-              </optgroup>
-              <optgroup label="DeepSeek">
-                <option value="deepseek/deepseek-v4-pro">DeepSeek V4 Pro · MoE</option>
-                <option value="deepseek/deepseek-v4.1-flash">DeepSeek V4.1 Flash · CED</option>
-                <option value="deepseek/deepseek-v4-flash">DeepSeek V4 Flash</option>
-              </optgroup>
-              <optgroup label="Community / Open">
-                <option value="openrouter/free">OpenRouter Free Router</option>
-                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B Instruct</option>
-              </optgroup>
-            </select>
-            <span className="text-[10px] text-zinc-500 font-mono block">
-              Model değişiminde oturum hafızası korunur.
-            </span>
-          </div>
-
-          {/* Sandbox & Permissions */}
-          <div className="space-y-1.5">
-            <button
-              onClick={() => setIsSandboxToolsOpen(!isSandboxToolsOpen)}
-              className="w-full flex items-center justify-between text-[11px] font-mono text-zinc-400 hover:text-zinc-200 uppercase tracking-wider transition-colors duration-150 group"
-            >
-              <span>Sandbox Araçları</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isSandboxToolsOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isSandboxToolsOpen && (
-              <div className="space-y-1 mt-2">
-                {agent.tool_permissions?.allowed_tools?.map((tool) => (
-                  <div
-                    key={tool}
-                    className="flex items-center gap-2 px-2 py-1 rounded bg-zinc-950/60 border border-zinc-800/80 text-[11px] font-mono text-zinc-300"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
-                    <span className="truncate">{tool}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* System Instructions Preview */}
-          <div className="space-y-1">
-            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
-              Sistem Talimatları
-            </span>
-            <p className="text-[11px] text-zinc-400 bg-zinc-950/60 p-2 rounded border border-zinc-800/80 leading-relaxed font-mono line-clamp-4">
-              {agent.system_instructions}
-            </p>
-          </div>
-        </div>
-
-        <div className="pt-3 border-t border-zinc-800 flex items-center justify-between text-xs font-mono text-zinc-400">
-          <span>Durum:</span>
-          <span className="text-zinc-300 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> aktif
-          </span>
-        </div>
-      </div>
-
       {/* ---------------- CENTER PANEL: Live Interactive Conversation ---------------- */}
       <div className="flex-1 bg-zinc-900 rounded-lg border border-zinc-800 shadow-subtle flex flex-col justify-between overflow-hidden">
         {/* Chat Header */}
@@ -765,23 +695,69 @@ export default function AgentWorkspacePage() {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 relative"
           >
+            {/* Custom Model Dropdown */}
+            <div className="relative shrink-0" ref={modelDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-md transition-colors duration-150 h-full"
+                title="Model Seçimi"
+              >
+                {(() => {
+                  const activeModel = AVAILABLE_MODELS.find(m => m.id === selectedModel) || AVAILABLE_MODELS[0];
+                  return (
+                    <>
+                      <img src={getProviderIcon(activeModel.provider)} alt={activeModel.provider} className="w-3.5 h-3.5 object-contain opacity-80" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                      <span className="text-[11px] font-mono text-zinc-300 hidden sm:inline max-w-[120px] truncate">{activeModel.name}</span>
+                      {isModelDropdownOpen ? <ChevronUp className="w-3 h-3 text-zinc-500" /> : <ChevronDown className="w-3 h-3 text-zinc-500" />}
+                    </>
+                  );
+                })()}
+              </button>
+
+              {isModelDropdownOpen && (
+                <div className="absolute bottom-full left-0 mb-2 w-64 max-h-72 overflow-y-auto bg-zinc-900 border border-zinc-700 shadow-xl rounded-lg py-1.5 z-50 overflow-hidden">
+                  <div className="px-3 py-2 border-b border-zinc-800 bg-zinc-950/50 mb-1">
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">Aktif Çıkarım Modeli</span>
+                  </div>
+                  {AVAILABLE_MODELS.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        handleModelChange(m.id);
+                        setIsModelDropdownOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-left hover:bg-zinc-800 transition-colors ${selectedModel === m.id ? 'bg-zinc-800/80 text-blue-400' : 'text-zinc-300'}`}
+                    >
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <img src={getProviderIcon(m.provider)} alt={m.provider} className="w-3.5 h-3.5 object-contain shrink-0 opacity-80" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                        <span className="text-xs font-mono truncate">{m.name}</span>
+                      </div>
+                      {selectedModel === m.id && <CheckCircle2 className="w-3 h-3 shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={`${agent.name} için bir komut veya soru yazın...`}
+              placeholder={`${agent?.name || "Ajan"} için bir komut veya soru yazın...`}
               disabled={isStreaming}
               className="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition-colors duration-75"
             />
             <button
               type="submit"
               disabled={!input.trim() || isStreaming}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 hover-glow disabled:opacity-40 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75 cursor-pointer"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 hover-glow disabled:opacity-40 text-white rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shrink-0"
             >
               <Send className="w-3 h-3" />
-              <span>Gönder</span>
+              <span className="hidden sm:inline">Gönder</span>
             </button>
           </form>
         </div>
