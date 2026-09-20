@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronRight,
+  ChevronDown,
   RefreshCw,
   FolderOpen,
   LogIn
@@ -46,6 +47,7 @@ export default function AgentWorkspacePage() {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [isSandboxToolsOpen, setIsSandboxToolsOpen] = useState(false);
   const [thinkingSeconds, setThinkingSeconds] = useState(0);
   const [displayedThought, setDisplayedThought] = useState("İstek analiz ediliyor...");
   const [thoughtFade, setThoughtFade] = useState(true);
@@ -468,20 +470,26 @@ export default function AgentWorkspacePage() {
 
           {/* Sandbox & Permissions */}
           <div className="space-y-1.5">
-            <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
-              Sandbox Araçları
-            </span>
-            <div className="space-y-1">
-              {agent.tool_permissions?.allowed_tools?.map((tool) => (
-                <div
-                  key={tool}
-                  className="flex items-center gap-2 px-2 py-1 rounded bg-zinc-950/60 border border-zinc-800/80 text-[11px] font-mono text-zinc-300"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
-                  <span className="truncate">{tool}</span>
-                </div>
-              ))}
-            </div>
+            <button
+              onClick={() => setIsSandboxToolsOpen(!isSandboxToolsOpen)}
+              className="w-full flex items-center justify-between text-[11px] font-mono text-zinc-400 hover:text-zinc-200 uppercase tracking-wider transition-colors duration-150 group"
+            >
+              <span>Sandbox Araçları</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isSandboxToolsOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isSandboxToolsOpen && (
+              <div className="space-y-1 mt-2">
+                {agent.tool_permissions?.allowed_tools?.map((tool) => (
+                  <div
+                    key={tool}
+                    className="flex items-center gap-2 px-2 py-1 rounded bg-zinc-950/60 border border-zinc-800/80 text-[11px] font-mono text-zinc-300"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                    <span className="truncate">{tool}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* System Instructions Preview */}
