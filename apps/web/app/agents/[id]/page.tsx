@@ -251,7 +251,7 @@ export default function AgentWorkspacePage() {
         const chunk = decoder.decode(value, { stream: true });
         // parse chunk...
         // ... handled in the real code via string manipulation. Let me implement properly here:
-        const lines = chunk.split("
+        const lines = chunk.split("\n");
 ");
         for (const line of lines) {
            if (line.startsWith("data: ")) {
