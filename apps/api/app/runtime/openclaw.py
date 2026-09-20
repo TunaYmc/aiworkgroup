@@ -25,7 +25,7 @@ class OpenClawRuntimeAdapter(AgentRuntime):
         """
         Registers an isolated agent in the OpenClaw harness and provisions its sandboxed workspace.
         """
-        workspace_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, organization_id, "agents", agent_id, "workspace")
+        workspace_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, organization_id, "documents")
         os.makedirs(workspace_dir, exist_ok=True)
 
         payload = {
@@ -86,7 +86,7 @@ class OpenClawRuntimeAdapter(AgentRuntime):
         """
         # Ensure agent workspace path is populated in context
         organization_id = context.get("organization_id", "default_org")
-        workspace_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, organization_id, "agents", agent_id, "workspace")
+        workspace_dir = os.path.join(settings.DEFAULT_WORKSPACE_ROOT, organization_id, "documents")
         os.makedirs(workspace_dir, exist_ok=True)
         context["workspace_path"] = workspace_dir
 
