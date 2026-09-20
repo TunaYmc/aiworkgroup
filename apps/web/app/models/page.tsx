@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { Cpu, Check, Sparkles, Zap, Shield, HelpCircle } from "lucide-react";
+import { SkeletonCard } from "@/components/Skeleton";
 import { api, ModelItem } from "@/lib/api";
 
 export default function ModelsPage() {
   const [models, setModels] = useState<ModelItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     api.get<ModelItem[]>("/models/catalog").then((res) => {
       setModels(res);
     }).catch(() => {
@@ -123,6 +126,8 @@ export default function ModelsPage() {
           is_default: false,
         }
       ]);
+    }).finally(() => {
+      setLoading(false);
     });
   }, []);
 
@@ -145,70 +150,79 @@ export default function ModelsPage() {
 
       {/* Model Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {models.map((model) => (
-          <div
-            key={model.id}
-            className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 shadow-subtle flex flex-col justify-between hover:border-zinc-700 transition-colors duration-75"
-          >
-            <div>
-              {/* Card Title & Provider */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium text-xs text-zinc-100 truncate">{model.name}</h3>
-                    {model.is_default && (
-                      <span className="text-[10px] font-mono bg-blue-950/40 text-blue-400 border border-blue-800/40 px-1.5 py-0.5 rounded">
-                        default
-                      </span>
-                    )}
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          models.map((model) => (
+            <div
+              key={model.id}
+              className="bg-zinc-900 rounded-lg border border-zinc-800 p-5 shadow-subtle flex flex-col justify-between hover:border-zinc-700 transition-colors duration-75"
+            >
+              <div>
+                {/* Card Title & Provider */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-medium text-xs text-zinc-100 truncate">{model.name}</h3>
+                      {model.is_default && (
+                        <span className="text-[10px] font-mono bg-blue-950/40 text-blue-400 border border-blue-800/40 px-1.5 py-0.5 rounded">
+                          default
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-zinc-500 font-mono mt-0.5 block truncate">{model.id}</span>
                   </div>
-                  <span className="text-[11px] text-zinc-500 font-mono mt-0.5 block truncate">{model.id}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60 shrink-0">
+                    {model.provider}
+                  </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded border border-zinc-700/60 shrink-0">
-                  {model.provider}
+
+                {/* Description with fixed baseline alignment */}
+                <p className="text-xs text-zinc-400 leading-relaxed mt-2.5 line-clamp-2 min-h-[36px]">
+                  {model.description}
+                </p>
+
+                {/* Specs Grid: Left, Center, Right aligned */}
+                <div className="grid grid-cols-3 gap-2 py-2.5 my-3 border-y border-zinc-800/80 text-[11px] font-mono">
+                  <div>
+                    <span className="text-zinc-500 block text-[10px]">Bağlam:</span>
+                    <span className="text-zinc-200 font-medium">
+                      {(model.context_length / 1000).toFixed(0)}k token
+                    </span>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-zinc-500 block text-[10px]">Giriş (1M):</span>
+                    <span className="text-zinc-200 font-medium">
+                      ${model.prompt_price_per_1m.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-zinc-500 block text-[10px]">Çıkış (1M):</span>
+                    <span className="text-zinc-200 font-medium">
+                      ${model.completion_price_per_1m.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-1">
+                <span className="flex items-center gap-1.5 text-zinc-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                  <span>Tool Calling & Streaming</span>
+                </span>
+                <span className="text-zinc-500 text-[10px]">
+                  {model.supports_tools ? "Full Support" : "Inference Only"}
                 </span>
               </div>
-
-              {/* Description with fixed baseline alignment */}
-              <p className="text-xs text-zinc-400 leading-relaxed mt-2.5 line-clamp-2 min-h-[36px]">
-                {model.description}
-              </p>
-
-              {/* Specs Grid: Left, Center, Right aligned */}
-              <div className="grid grid-cols-3 gap-2 py-2.5 my-3 border-y border-zinc-800/80 text-[11px] font-mono">
-                <div>
-                  <span className="text-zinc-500 block text-[10px]">Bağlam:</span>
-                  <span className="text-zinc-200 font-medium">
-                    {(model.context_length / 1000).toFixed(0)}k token
-                  </span>
-                </div>
-                <div className="text-center">
-                  <span className="text-zinc-500 block text-[10px]">Giriş (1M):</span>
-                  <span className="text-zinc-200 font-medium">
-                    ${model.prompt_price_per_1m.toFixed(2)}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-zinc-500 block text-[10px]">Çıkış (1M):</span>
-                  <span className="text-zinc-200 font-medium">
-                    ${model.completion_price_per_1m.toFixed(2)}
-                  </span>
-                </div>
-              </div>
             </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-1">
-              <span className="flex items-center gap-1.5 text-zinc-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
-                <span>Tool Calling & Streaming</span>
-              </span>
-              <span className="text-zinc-500 text-[10px]">
-                {model.supports_tools ? "Full Support" : "Inference Only"}
-              </span>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

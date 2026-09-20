@@ -2,15 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import { UploadCloud, FileText, Trash2, Search, CheckCircle2, Eye, Download } from "lucide-react";
+import { SkeletonRow } from "@/components/Skeleton";
 import { api, FileItem, getApiUrl } from "@/lib/api";
 
 export default function FilesPage() {
   const [files, setFiles] = useState<FileItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const fetchFiles = async () => {
     try {
+      setLoading(true);
       const res = await api.get<FileItem[]>("/files");
       setFiles(res);
     } catch {
@@ -26,6 +29,8 @@ export default function FilesPage() {
           created_at: "Bugün 09:30"
         }
       ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -147,60 +152,77 @@ export default function FilesPage() {
 
       {/* Files List */}
       <div className="bg-zinc-900 rounded-lg border border-zinc-800 divide-y divide-zinc-800/80 overflow-hidden shadow-subtle">
-        {filteredFiles.map((file) => (
-          <div key={file.id} className="p-3.5 flex items-center justify-between gap-4 hover:bg-zinc-800/40 transition-colors duration-75">
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded bg-zinc-800 border border-zinc-700/60 text-zinc-400 flex items-center justify-center shrink-0">
-                <FileText className="w-3.5 h-3.5" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="text-xs font-medium text-zinc-200 truncate">{file.filename}</h4>
-                <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 mt-0.5">
-                  <span>
-                    {file.size < 1024
-                      ? `${file.size} B`
-                      : file.size < 1024 * 1024
-                      ? `${(file.size / 1024).toFixed(1)} KB`
-                      : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+        {loading ? (
+          <>
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+          </>
+        ) : (
+          <>
+            {filteredFiles.map((file) => (
+              <div key={file.id} className="p-3.5 flex items-center justify-between gap-4 hover:bg-zinc-800/40 transition-colors duration-75">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded bg-zinc-800 border border-zinc-700/60 text-zinc-400 flex items-center justify-center shrink-0">
+                    <FileText className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-medium text-zinc-200 truncate">{file.filename}</h4>
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 mt-0.5">
+                      <span>
+                        {file.size < 1024
+                          ? `${file.size} B`
+                          : file.size < 1024 * 1024
+                          ? `${(file.size / 1024).toFixed(1)} KB`
+                          : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+                      </span>
+                      <span>·</span>
+                      <span>{file.created_at}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 mr-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>ready</span>
                   </span>
-                  <span>·</span>
-                  <span>{file.created_at}</span>
+
+                  <button
+                    onClick={() => handleDownload(file, true)}
+                    title="Önizle"
+                    className="p-1.5 text-zinc-400 hover:text-blue-400 rounded hover:bg-zinc-800 transition-colors duration-75"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDownload(file, false)}
+                    title="İndir"
+                    className="p-1.5 text-zinc-400 hover:text-blue-400 rounded hover:bg-zinc-800 transition-colors duration-75"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => alert("Dosya silme yetkisi tenant yöneticisine aittir.")}
+                    title="Sil"
+                    className="p-1.5 text-zinc-500 hover:text-rose-400 rounded hover:bg-zinc-800 transition-colors duration-75"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400 mr-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>ready</span>
-              </span>
-
-              <button
-                onClick={() => handleDownload(file, true)}
-                title="Önizle"
-                className="p-1.5 text-zinc-400 hover:text-blue-400 rounded hover:bg-zinc-800 transition-colors duration-75"
-              >
-                <Eye className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                onClick={() => handleDownload(file, false)}
-                title="İndir"
-                className="p-1.5 text-zinc-400 hover:text-blue-400 rounded hover:bg-zinc-800 transition-colors duration-75"
-              >
-                <Download className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                onClick={() => alert("Dosya silme yetkisi tenant yöneticisine aittir.")}
-                title="Sil"
-                className="p-1.5 text-zinc-500 hover:text-rose-400 rounded hover:bg-zinc-800 transition-colors duration-75"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        ))}
+            ))}
+            {filteredFiles.length === 0 && (
+              <div className="p-8 text-center text-xs text-zinc-500 font-mono">
+                Arama kriterlerine uygun veya yüklenmiş döküman bulunamadı.
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

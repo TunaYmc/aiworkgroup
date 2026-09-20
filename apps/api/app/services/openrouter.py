@@ -343,6 +343,8 @@ class OpenRouterService:
             try:
                 while turns < max_turns:
                     turns += 1
+                    model_display = candidate_model.split('/')[-1]
+                    yield {"type": "thought", "content": f"Model akıl yürütüyor ({model_display})..."}
                     data = await self.call_completion(candidate_messages, model=candidate_model, tools=tool_schemas)
                     choice = data["choices"][0]
                     msg = choice["message"]
@@ -365,6 +367,24 @@ class OpenRouterService:
                         except Exception:
                             tool_args = {}
 
+                        # Yield user-facing descriptive thought
+                        if tool_name == "file_read":
+                            fp = tool_args.get("filepath", "dosya")
+                            yield {"type": "thought", "content": f"'{fp}' dökümanı okunuyor ve inceleniyor..."}
+                        elif tool_name == "python":
+                            yield {"type": "thought", "content": "Python ortamında hesaplama ve kod yürütülüyor..."}
+                        elif tool_name == "file_write":
+                            fp = tool_args.get("filepath", "dosya")
+                            yield {"type": "thought", "content": f"'{fp}' dosyası hazırlanıp diske yazılıyor..."}
+                        elif tool_name in ("search_knowledge", "read_document"):
+                            q = tool_args.get("query") or tool_args.get("filename") or "şirket belgeleri"
+                            yield {"type": "thought", "content": f"Kurumsal bilgi tabanında '{q}' taranıyor..."}
+                        elif tool_name == "web_search":
+                            q = tool_args.get("query", "arama")
+                            yield {"type": "thought", "content": f"Web üzerinde '{q}' araştırılıyor..."}
+                        else:
+                            yield {"type": "thought", "content": f"'{tool_name}' aracı ile işlem yapılıyor..."}
+
                         yield {
                             "type": "tool_call",
                             "tool": tool_name,
@@ -383,6 +403,7 @@ class OpenRouterService:
                                 "result": result
                             }
                             tool_output_str = json.dumps(result, ensure_ascii=False)
+                            yield {"type": "thought", "content": f"'{tool_name}' sonuçları sentezleniyor..."}
                         except PermissionError as pe:
                             yield {
                                 "type": "permission_denied",

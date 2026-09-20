@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import AgentCard from "@/components/AgentCard";
 import CreateAgentModal from "@/components/CreateAgentModal";
+import { SkeletonStatCard, SkeletonCard, SkeletonRow } from "@/components/Skeleton";
 import { api, Agent, Task } from "@/lib/api";
 
 export default function DashboardPage() {
@@ -173,29 +174,36 @@ export default function DashboardPage() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {[
-          {
-            label: "Aktif Ajanlar",
-            value: agents.length.toString(),
-            detail: "Çalışma alanları hazır",
-          },
-          {
-            label: "Yürütülen Görevler",
-            value: tasks.filter(t => t.status === "running").length.toString(),
-            detail: "Sandbox kuyruğu aktif",
-          },
-          {
-            label: "İşlenen Dökümanlar",
-            value: "148",
-            detail: "Döküman havuzunda",
-          },
-          {
-            label: "Aylık Tüketim",
-            value: "2.4M",
-            detail: "$7.20 / $30.00 bütçe",
-          },
-        ].map((metric, i) => {
-          return (
+        {loading ? (
+          <>
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+          </>
+        ) : (
+          [
+            {
+              label: "Aktif Ajanlar",
+              value: agents.length.toString(),
+              detail: "Çalışma alanları hazır",
+            },
+            {
+              label: "Yürütülen Görevler",
+              value: tasks.filter(t => t.status === "running").length.toString(),
+              detail: "Sandbox kuyruğu aktif",
+            },
+            {
+              label: "İşlenen Dökümanlar",
+              value: "148",
+              detail: "Döküman havuzunda",
+            },
+            {
+              label: "Aylık Tüketim",
+              value: "2.4M",
+              detail: "$7.20 / $30.00 bütçe",
+            },
+          ].map((metric, i) => (
             <div
               key={i}
               className="bg-zinc-900 rounded-lg border border-zinc-800 p-4 shadow-subtle flex flex-col justify-between"
@@ -209,8 +217,8 @@ export default function DashboardPage() {
                 <p className="text-[11px] font-mono text-zinc-500 mt-0.5">{metric.detail}</p>
               </div>
             </div>
-          );
-        })}
+          ))
+        )}
       </div>
 
       {/* Agents Grid Section */}
@@ -219,7 +227,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-zinc-100">Ajan Servisleri</h2>
             <span className="text-[10px] font-mono bg-zinc-800 text-zinc-400 border border-zinc-700/60 px-1.5 py-0.5 rounded leading-none">
-              {agents.length} Servis
+              {loading ? "..." : `${agents.length} Servis`}
             </span>
           </div>
           <Link
@@ -231,11 +239,19 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-          {agents.map((agent) => (
-            <AgentCard key={agent.id} agent={agent} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+            {agents.map((agent) => (
+              <AgentCard key={agent.id} agent={agent} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Recent Tasks & Execution Feed */}
@@ -255,50 +271,58 @@ export default function DashboardPage() {
         </div>
 
         <div className="divide-y divide-zinc-800/80">
-          {tasks.map((task) => {
-            const isCompleted = task.status === "completed";
-            const isRunning = task.status === "running";
-            return (
-              <div key={task.id} className="py-3 flex items-center justify-between gap-4">
-                <div className="flex items-start gap-2.5">
-                  <div className="mt-1.5 shrink-0">
-                    <span
-                      className={`block w-1.5 h-1.5 rounded-full ${
-                        isCompleted
-                          ? "bg-emerald-500"
-                          : isRunning
-                          ? "bg-blue-500 animate-pulse"
-                          : "bg-zinc-600"
-                      }`}
-                    ></span>
+          {loading ? (
+            <>
+              <SkeletonRow />
+              <SkeletonRow />
+              <SkeletonRow />
+            </>
+          ) : (
+            tasks.map((task) => {
+              const isCompleted = task.status === "completed";
+              const isRunning = task.status === "running";
+              return (
+                <div key={task.id} className="py-3 flex items-center justify-between gap-4">
+                  <div className="flex items-start gap-2.5">
+                    <div className="mt-1.5 shrink-0">
+                      <span
+                        className={`block w-1.5 h-1.5 rounded-full ${
+                          isCompleted
+                            ? "bg-emerald-500"
+                            : isRunning
+                            ? "bg-blue-500 animate-pulse"
+                            : "bg-zinc-600"
+                        }`}
+                      ></span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-medium text-zinc-200">{task.title}</h4>
+                      <p className="text-[11px] text-zinc-500 mt-0.5 line-clamp-1">{task.input_prompt}</p>
+                      {task.output_result && (
+                        <span className="inline-block text-[10px] font-mono text-zinc-400 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded mt-1">
+                          Sonuç: {task.output_result}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-medium text-zinc-200">{task.title}</h4>
-                    <p className="text-[11px] text-zinc-500 mt-0.5 line-clamp-1">{task.input_prompt}</p>
-                    {task.output_result && (
-                      <span className="inline-block text-[10px] font-mono text-zinc-400 bg-zinc-950 border border-zinc-800 px-1.5 py-0.5 rounded mt-1">
-                        Sonuç: {task.output_result}
-                      </span>
-                    )}
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2 shrink-0 text-right">
-                  <span
-                    className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                      isCompleted
-                        ? "bg-zinc-950 text-emerald-400 border-emerald-950/40"
-                        : isRunning
-                        ? "bg-zinc-950 text-blue-400 border-blue-950/40"
-                        : "bg-zinc-950 text-zinc-400 border-zinc-800"
-                    }`}
-                  >
-                    {isCompleted ? "Tamamlandı" : isRunning ? "İşleniyor" : task.status}
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0 text-right">
+                    <span
+                      className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                        isCompleted
+                          ? "bg-zinc-950 text-emerald-400 border-emerald-950/40"
+                          : isRunning
+                          ? "bg-zinc-950 text-blue-400 border-blue-950/40"
+                          : "bg-zinc-950 text-zinc-400 border-zinc-800"
+                      }`}
+                    >
+                      {isCompleted ? "Tamamlandı" : isRunning ? "İşleniyor" : task.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
 

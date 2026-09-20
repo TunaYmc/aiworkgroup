@@ -4,16 +4,19 @@ import React, { useState, useEffect } from "react";
 import { Bot, Plus, Search, Filter, Sparkles } from "lucide-react";
 import AgentCard from "@/components/AgentCard";
 import CreateAgentModal from "@/components/CreateAgentModal";
+import { SkeletonCard } from "@/components/Skeleton";
 import { api, Agent } from "@/lib/api";
 
 export default function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchAgents = async () => {
     try {
+      setLoading(true);
       const res = await api.get<Agent[]>("/agents");
       setAgents(res);
     } catch {
@@ -59,6 +62,8 @@ export default function AgentsPage() {
           updated_at: new Date().toISOString(),
         }
       ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,13 +137,26 @@ export default function AgentsPage() {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
-        {filteredAgents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} />
-        ))}
-        {filteredAgents.length === 0 && (
-          <div className="col-span-full py-12 text-center text-xs text-zinc-500 font-mono bg-zinc-900/50 rounded-lg border border-zinc-800/80">
-            Arama kriterlerine uygun ajan servisi bulunamadı.
-          </div>
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            {filteredAgents.map((agent) => (
+              <AgentCard key={agent.id} agent={agent} />
+            ))}
+            {filteredAgents.length === 0 && (
+              <div className="col-span-full py-12 text-center text-xs text-zinc-500 font-mono bg-zinc-900/50 rounded-lg border border-zinc-800/80">
+                Arama kriterlerine uygun ajan servisi bulunamadı.
+              </div>
+            )}
+          </>
         )}
       </div>
 

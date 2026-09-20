@@ -27,6 +27,7 @@ interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
   timestamp: string;
+  thoughtDuration?: number;
   toolEvent?: {
     tool: string;
     status: string;
@@ -40,25 +41,79 @@ export default function AgentWorkspacePage() {
   const agentId = params?.id as string;
 
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [loadingAgent, setLoadingAgent] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [currentToolActivity, setCurrentToolActivity] = useState<string | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
+  const [thinkingSeconds, setThinkingSeconds] = useState(0);
+  const [displayedThought, setDisplayedThought] = useState("İstek analiz ediliyor...");
+  const [thoughtFade, setThoughtFade] = useState(true);
+  const [activeAssistantMsgId, setActiveAssistantMsgId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState("anthropic/claude-3.7-sonnet");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const thinkingStartTimeRef = useRef<number>(0);
+  const thinkingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const nextThoughtRef = useRef<string | null>(null);
+  const lastThoughtSwitchTimeRef = useRef<number>(0);
+  const thoughtCooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const updateThoughtText = (newThought: string) => {
+    if (!newThought || newThought === displayedThought) return;
+    const now = Date.now();
+    const elapsedSinceLastSwitch = now - lastThoughtSwitchTimeRef.current;
+    const COOLDOWN_MS = 500; // 0.5s cooldown requested by user
+
+    const applyThought = (text: string) => {
+      setThoughtFade(false);
+      setTimeout(() => {
+        setDisplayedThought(text);
+        setThoughtFade(true);
+        lastThoughtSwitchTimeRef.current = Date.now();
+      }, 150);
+    };
+
+    if (elapsedSinceLastSwitch >= COOLDOWN_MS) {
+      applyThought(newThought);
+    } else {
+      nextThoughtRef.current = newThought;
+      if (thoughtCooldownTimerRef.current) clearTimeout(thoughtCooldownTimerRef.current);
+      thoughtCooldownTimerRef.current = setTimeout(() => {
+        if (nextThoughtRef.current) {
+          applyThought(nextThoughtRef.current);
+          nextThoughtRef.current = null;
+        }
+      }, COOLDOWN_MS - elapsedSinceLastSwitch);
+    }
+  };
+
+  const stopThinking = (msgId?: string) => {
+    if (thinkingIntervalRef.current) {
+      clearInterval(thinkingIntervalRef.current);
+      thinkingIntervalRef.current = null;
+    }
+    const finalSec = parseFloat(((Date.now() - thinkingStartTimeRef.current) / 1000).toFixed(1));
+    setIsThinking(false);
+    if (msgId) {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === msgId && !m.thoughtDuration ? { ...m, thoughtDuration: finalSec } : m))
+      );
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
-    // Fetch Agent details
+    setLoadingAgent(true);
+
     api.get<Agent>(`/agents/${agentId}`).then((data) => {
       setAgent(data);
       if (data.model_config_data?.primary_model) {
         setSelectedModel(data.model_config_data.primary_model);
       }
     }).catch(() => {
-      // Fallback
       setAgent({
         id: agentId,
         organization_id: "org-1",
@@ -72,9 +127,10 @@ export default function AgentWorkspacePage() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+    }).finally(() => {
+      setLoadingAgent(false);
     });
 
-    // Initial greeting
     setMessages([
       {
         id: "msg-1",
@@ -87,7 +143,7 @@ export default function AgentWorkspacePage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, currentToolActivity]);
+  }, [messages, isThinking, displayedThought]);
 
   const handleSendMessage = async () => {
     if (!input.trim() || isStreaming) return;
@@ -105,6 +161,7 @@ export default function AgentWorkspacePage() {
     setIsStreaming(true);
 
     const assistantMsgId = (Date.now() + 1).toString();
+    setActiveAssistantMsgId(assistantMsgId);
     setMessages((prev) => [
       ...prev,
       {
@@ -115,11 +172,25 @@ export default function AgentWorkspacePage() {
       },
     ]);
 
+    // Initialize thinking mode
+    setIsThinking(true);
+    setThinkingSeconds(0);
+    setDisplayedThought("İstek analiz ediliyor...");
+    setThoughtFade(true);
+    thinkingStartTimeRef.current = Date.now();
+    lastThoughtSwitchTimeRef.current = Date.now();
+    if (thinkingIntervalRef.current) clearInterval(thinkingIntervalRef.current);
+    thinkingIntervalRef.current = setInterval(() => {
+      const elapsed = (Date.now() - thinkingStartTimeRef.current) / 1000;
+      setThinkingSeconds(parseFloat(elapsed.toFixed(1)));
+    }, 100);
+
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const orgId = typeof window !== "undefined" ? localStorage.getItem("currentOrgId") : null;
 
       if (!token) {
+        stopThinking(assistantMsgId);
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMsgId
@@ -144,6 +215,7 @@ export default function AgentWorkspacePage() {
       });
 
       if (!res.ok || !res.body) {
+        stopThinking(assistantMsgId);
         if (res.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("currentOrgId");
@@ -171,17 +243,30 @@ export default function AgentWorkspacePage() {
       const processEvent = (event: any) => {
         if (!event) return;
         if (event.type === "thought") {
-          setCurrentToolActivity(event.content);
+          updateThoughtText(event.content);
         } else if (event.type === "tool_call") {
-          setCurrentToolActivity(`Araç çalıştırılıyor: ${event.tool}...`);
+          const tool = event.tool;
+          if (tool === "file_read") {
+            updateThoughtText("Belge okunuyor ve inceleniyor...");
+          } else if (tool === "python") {
+            updateThoughtText("Python kodu çalıştırılıyor ve veri işleniyor...");
+          } else if (tool === "file_write") {
+            updateThoughtText("Dosya ve rapor diske kaydediliyor...");
+          } else if (tool === "search_knowledge" || tool === "read_document") {
+            updateThoughtText("Kurumsal bilgi havuzunda taranıyor...");
+          } else if (tool === "web_search") {
+            updateThoughtText("Web üzerinde araştırma yapılıyor...");
+          } else {
+            updateThoughtText(`'${tool}' aracı çalıştırılıyor...`);
+          }
         } else if (event.type === "tool_result") {
-          setCurrentToolActivity(`Araç tamamlandı: ${event.tool}`);
+          updateThoughtText(`'${event.tool}' tamamlandı, sonuçlar değerlendiriliyor...`);
         } else if (event.type === "permission_denied") {
-          setCurrentToolActivity(`Güvenlik Engeli: ${event.message}`);
+          updateThoughtText(`Güvenlik engeli: ${event.message}`);
         } else if (event.type === "assistant_text") {
           if (event.content) {
             receivedAnyText = true;
-            setCurrentToolActivity(null);
+            stopThinking(assistantMsgId);
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === assistantMsgId ? { ...m, content: m.content + event.content } : m
@@ -190,7 +275,7 @@ export default function AgentWorkspacePage() {
           }
         } else if (event.type === "error") {
           receivedAnyText = true;
-          setCurrentToolActivity(null);
+          stopThinking(assistantMsgId);
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMsgId
@@ -199,7 +284,7 @@ export default function AgentWorkspacePage() {
             )
           );
         } else if (event.type === "done") {
-          setCurrentToolActivity(null);
+          stopThinking(assistantMsgId);
         }
       };
 
@@ -252,6 +337,7 @@ export default function AgentWorkspacePage() {
 
       // Safeguard: ensure balloon is never empty
       if (!receivedAnyText) {
+        stopThinking(assistantMsgId);
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMsgId && !m.content
@@ -261,6 +347,7 @@ export default function AgentWorkspacePage() {
         );
       }
     } catch (err: any) {
+      stopThinking(assistantMsgId);
       console.error("Chat streaming error:", err);
       setMessages((prev) =>
         prev.map((m) =>
@@ -271,7 +358,9 @@ export default function AgentWorkspacePage() {
       );
     } finally {
       setIsStreaming(false);
-      setCurrentToolActivity(null);
+      stopThinking(assistantMsgId);
+      setActiveAssistantMsgId(null);
+    }
     }
   };
 
@@ -287,8 +376,34 @@ export default function AgentWorkspacePage() {
     }
   };
 
-  if (!agent) {
-    return <div className="p-8 text-center text-slate-500">Yükleniyor...</div>;
+  if (loadingAgent || !agent) {
+    return (
+      <div className="h-[calc(100vh-5.5rem)] flex flex-col md:flex-row gap-4 w-full max-w-7xl animate-pulse">
+        <div className="w-full md:w-72 bg-zinc-900 rounded-lg border border-zinc-800 p-4 space-y-4 shrink-0">
+          <div className="flex items-center gap-3 pb-3 border-b border-zinc-800">
+            <div className="w-8 h-8 rounded bg-zinc-800 shrink-0" />
+            <div className="space-y-1.5 flex-1">
+              <div className="h-3.5 bg-zinc-800 rounded w-3/4" />
+              <div className="h-2.5 bg-zinc-800 rounded w-1/2" />
+            </div>
+          </div>
+          <div className="h-8 bg-zinc-800 rounded-md w-full" />
+          <div className="space-y-2 pt-2">
+            <div className="h-3 bg-zinc-800 rounded w-1/3" />
+            <div className="h-6 bg-zinc-800 rounded w-full" />
+            <div className="h-6 bg-zinc-800 rounded w-full" />
+          </div>
+        </div>
+        <div className="flex-1 bg-zinc-900 rounded-lg border border-zinc-800 p-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="h-14 bg-zinc-800/80 rounded-md w-2/3" />
+            <div className="h-10 bg-zinc-800/80 rounded-md w-1/2 ml-auto" />
+            <div className="h-16 bg-zinc-800/80 rounded-md w-3/4" />
+          </div>
+          <div className="h-10 bg-zinc-800 rounded-md w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -423,6 +538,51 @@ export default function AgentWorkspacePage() {
 
           {messages.map((msg) => {
             const isUser = msg.role === "user";
+
+            // If this assistant message is currently thinking and has not yet received final content
+            if (!isUser && !msg.content && isThinking && msg.id === activeAssistantMsgId) {
+              return (
+                <div key={msg.id} className="flex gap-2.5 justify-start">
+                  <div className="w-6 h-6 rounded bg-zinc-800 text-zinc-300 font-mono text-[10px] font-semibold flex items-center justify-center shrink-0 border border-zinc-700/60 mt-0.5">
+                    {agent.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="w-full max-w-[85%] sm:max-w-[70%] rounded-lg p-3.5 bg-zinc-950 border border-zinc-800 text-zinc-200 space-y-2.5 shadow-subtle">
+                    {/* Header with live timer */}
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-2 text-[11px] font-mono font-medium text-blue-400">
+                        <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                        <span>Thinking for {thinkingSeconds.toFixed(1)}s</span>
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                        {selectedModel.split("/").pop()}
+                      </span>
+                    </div>
+
+                    {/* Real-time thought with smooth fade transition & 0.5s cooldown */}
+                    <div className="min-h-[22px] flex items-center">
+                      <p
+                        className={`text-xs text-zinc-300 font-mono transition-opacity duration-150 ${
+                          thoughtFade ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        {displayedThought}
+                      </p>
+                    </div>
+
+                    {/* macOS-style indeterminate loading bar beneath agent thinking bubble */}
+                    <div className="macos-loading-track w-full mt-1.5">
+                      <div className="macos-loading-indicator" />
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Don't render empty assistant bubble if not thinking or already finished
+            if (!isUser && !msg.content) {
+              return null;
+            }
+
             return (
               <div
                 key={msg.id}
@@ -440,6 +600,12 @@ export default function AgentWorkspacePage() {
                       : "bg-zinc-950 border border-zinc-800 text-zinc-200"
                   }`}
                 >
+                  {!isUser && msg.thoughtDuration !== undefined && (
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 mb-2 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
+                      <Sparkles className="w-3 h-3 text-blue-400" />
+                      <span>Thinking for {msg.thoughtDuration}s</span>
+                    </div>
+                  )}
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   <span
                     className={`text-[9px] font-mono mt-1.5 block ${
@@ -452,17 +618,6 @@ export default function AgentWorkspacePage() {
               </div>
             );
           })}
-
-          {/* Live Activity Event (Thinking & Tool Streaming) */}
-          {currentToolActivity && (
-            <div className="flex items-center gap-2.5 p-2.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-300 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0"></span>
-              <div className="flex items-center gap-2">
-                <span className="text-zinc-400">İşlem:</span>
-                <span className="text-zinc-200 truncate">{currentToolActivity}</span>
-              </div>
-            </div>
-          )}
 
           <div ref={messagesEndRef} />
         </div>

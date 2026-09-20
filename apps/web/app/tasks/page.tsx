@@ -2,14 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import { CheckSquare, Clock, Filter, AlertCircle, CheckCircle2, Play, Ban } from "lucide-react";
+import { SkeletonRow } from "@/components/Skeleton";
 import { api, Task } from "@/lib/api";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchTasks = async () => {
     try {
+      setLoading(true);
       const res = await api.get<Task[]>("/tasks");
       setTasks(res);
     } catch {
@@ -51,6 +54,8 @@ export default function TasksPage() {
           created_at: "Bugün 12:15"
         }
       ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,55 +101,71 @@ export default function TasksPage() {
 
       {/* Task List */}
       <div className="bg-zinc-900 rounded-lg border border-zinc-800 divide-y divide-zinc-800/80 overflow-hidden shadow-subtle">
-        {filteredTasks.map((task) => {
-          const isDone = task.status === "completed";
-          const isRunning = task.status === "running";
-          return (
-            <div key={task.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-zinc-800/30 transition-colors duration-75">
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${
-                      task.priority === "urgent"
-                        ? "bg-rose-950/30 text-rose-400 border-rose-900/50"
-                        : task.priority === "high"
-                        ? "bg-zinc-800 text-blue-400 border-blue-900/50"
-                        : "bg-zinc-950 text-zinc-400 border-zinc-800"
-                    }`}
-                  >
-                    {task.priority}
-                  </span>
-                  <h3 className="font-medium text-xs text-zinc-200 truncate">{task.title}</h3>
-                </div>
+        {loading ? (
+          <>
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+            <SkeletonRow />
+          </>
+        ) : (
+          <>
+            {filteredTasks.map((task) => {
+              const isDone = task.status === "completed";
+              const isRunning = task.status === "running";
+              return (
+                <div key={task.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-zinc-800/30 transition-colors duration-75">
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border ${
+                          task.priority === "urgent"
+                            ? "bg-rose-950/30 text-rose-400 border-rose-900/50"
+                            : task.priority === "high"
+                            ? "bg-zinc-800 text-blue-400 border-blue-900/50"
+                            : "bg-zinc-950 text-zinc-400 border-zinc-800"
+                        }`}
+                      >
+                        {task.priority}
+                      </span>
+                      <h3 className="font-medium text-xs text-zinc-200 truncate">{task.title}</h3>
+                    </div>
 
-                <p className="text-xs text-zinc-400 leading-relaxed">{task.input_prompt}</p>
+                    <p className="text-xs text-zinc-400 leading-relaxed">{task.input_prompt}</p>
 
-                {task.output_result && (
-                  <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded-md text-[11px] text-zinc-300 font-mono">
-                    <span className="text-zinc-500 block mb-0.5">Sonuç:</span>
-                    {task.output_result}
+                    {task.output_result && (
+                      <div className="p-2.5 bg-zinc-950 border border-zinc-800 rounded-md text-[11px] text-zinc-300 font-mono">
+                        <span className="text-zinc-500 block mb-0.5">Sonuç:</span>
+                        {task.output_result}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="flex flex-col sm:items-end gap-1 shrink-0">
-                <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isDone
-                        ? "bg-emerald-500"
-                        : isRunning
-                        ? "bg-blue-500 animate-pulse"
-                        : "bg-zinc-600"
-                    }`}
-                  ></span>
-                  <span>{isDone ? "completed" : isRunning ? "running" : "queued"}</span>
-                </span>
-                <span className="text-[10px] font-mono text-zinc-500">{task.created_at}</span>
+                  <div className="flex flex-col sm:items-end gap-1 shrink-0">
+                    <span className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          isDone
+                            ? "bg-emerald-500"
+                            : isRunning
+                            ? "bg-blue-500 animate-pulse"
+                            : "bg-zinc-600"
+                        }`}
+                      ></span>
+                      <span>{isDone ? "completed" : isRunning ? "running" : "queued"}</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-500">{task.created_at}</span>
+                  </div>
+                </div>
+              );
+            })}
+            {filteredTasks.length === 0 && (
+              <div className="p-8 text-center text-xs text-zinc-500 font-mono">
+                Arama kriterlerine uygun görev bulunamadı.
               </div>
-            </div>
-          );
-        })}
+            )}
+          </>
+        )}
       </div>
     </div>
   );
